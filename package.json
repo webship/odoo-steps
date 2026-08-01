@@ -1,0 +1,58 @@
+{
+  "name": "@webship/odoo-steps",
+  "version": "2.0.0",
+  "description": "Odoo-specific Cucumber step definitions plugin for webship-js — BDD testing for the main pages of any Odoo Website site (Playwright + Cucumber).",
+  "main": "tests/step-definitions/odoo.steps.js",
+  "files": [
+    "tests/step-definitions/odoo.steps.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "cucumber-js --config cucumber.js",
+    "test:dry": "cucumber-js --config cucumber.js --dry-run",
+    "test:chromium": "BROWSER=chromium cucumber-js --config cucumber.js",
+    "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
+    "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js",
+    "test:headed": "HEADLESS=false cucumber-js --config cucumber.js",
+    "generate-reports": "generate-reports"
+  },
+  "keywords": [
+    "webship-js",
+    "odoo",
+    "cucumber",
+    "cucumber-js",
+    "playwright",
+    "bdd",
+    "gherkin",
+    "step-definitions",
+    "odoo-testing",
+    "e2e-testing"
+  ],
+  "author": "Webship.co",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webship/odoo-steps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webship/odoo-steps/issues"
+  },
+  "homepage": "https://github.com/webship/odoo-steps#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">= 20.0"
+  },
+  "peerDependencies": {
+    "webship-js": "^2.0.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "webship-js": "^2.0.4"
+  },
+  "overrides": {
+    "@cucumber/cucumber": "^12"
+  }
+}
