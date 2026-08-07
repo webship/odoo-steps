@@ -1,13 +1,20 @@
-# Requires the website_event app. Not installed on the default Odoo Website
-# install (only "website" + theme_default) — excluded from the default run
-# via the "not @requires-app" tag expression in cucumber.js.
+# Requires the website_event app. Tag it out with `--tags 'not @requires-app'`
+# when running against a site that does not have Events installed.
 @requires-app
 Feature: Odoo events
   As an anonymous visitor
-  I want to browse the Odoo Events page
-  So that I can see upcoming events
+  I want to see what is coming up and open an event
+  So that I can decide whether to register
 
-  Scenario: Events index renders the events list
+  Scenario: The events index lists published events
     Given I am on "/event"
-    Then I should be on the Odoo events page
-    And the response status code should be 200
+     Then the response status code should be 200
+      And I should be on the Odoo events page
+      And I should see a ".o_wevent_events_list" element
+
+  Scenario: An event from the index opens its own page with a way to register
+    Given I am on "/event"
+     When I click on the element ".o_wevent_events_list a[href*='/event/']"
+     Then the response status code should be 200
+      And I should see a "#wrap.o_wevent_event" element
+      And I should be on an Odoo website page

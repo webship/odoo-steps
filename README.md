@@ -8,16 +8,16 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 
 ## What's covered
 
-- Homepage / core Website layout (`#wrapwrap`, top menu, footer)
-- Blog index and single post
-- Shop index, search, product page, add-to-cart, cart badge
+- Core Website layout — `#wrapwrap`, top menu, footer
+- Blog index, single post, post title
+- Shop catalog, product page, catalog search, add-to-cart, cart badge
 - Events index
-- Jobs listing
+- Jobs board and job openings
 - `/contactus` form
-- `/web/login` login form + authentication (and the invalid-login error path)
-- 404 page
+- `/web/login` form, sign-in, and the rejected-credentials path
+- Page-not-found template
 
-See [tests/step-definitions/odoo.steps.js](tests/step-definitions/odoo.steps.js) for the full list of steps with Gherkin examples.
+Nothing else. Navigation, status codes, form filling, URL parameters, waits, meta tags and accessibility checks all come from webship-js's own step pack — use those directly in your feature files. See [tests/step-definitions/odoo.steps.js](tests/step-definitions/odoo.steps.js) for the full list with Gherkin examples.
 
 ## Requirements
 
@@ -54,15 +54,14 @@ This repo's own `tests/features/*.feature` files double as a working reference p
 ## Quick example
 
 ```gherkin
-Feature: Odoo homepage
+Feature: Odoo shop
 
-  Scenario: Homepage renders the Odoo Website layout
-    Given I am an anonymous user
-    And I am on the homepage
-    Then I should be on an Odoo website page
-    And the response status code should be 200
-    And I should see the Odoo top menu
-    And I should see the Odoo footer
+  Scenario: An added product stays in the cart while the shopper keeps browsing
+    Given I am on "/shop/furn-8888-office-lamp-6"
+     When I add the product to the Odoo cart
+     Then I should see "1" item in the Odoo cart
+     When I am on "/shop"
+     Then I should see "1" item in the Odoo cart
 ```
 
 More runnable examples: [tests/features/](tests/features/).
@@ -85,11 +84,17 @@ LAUNCH_URL=https://your-site.example npm test   # runs against your own site ins
 ddev delete -Oy odoo-steps     # tear down when done
 ```
 
+The Shop, Blog, Events and Jobs features are tagged `@requires-app` because they
+need `website_sale`, `website_blog`, `website_event` and `hr_recruitment`. The
+DDEV stack above installs all four, so `npm test` runs everything; point the
+suite at a site without them and use `npm run test:core` instead.
+
 Other scripts:
 
 | Script | Effect |
 | --- | --- |
 | `npm test` | Full suite, pretty output |
+| `npm run test:core` | Skips the `@requires-app` features (Shop, Blog, Events, Jobs) |
 | `npm run test:dry` | `--dry-run` — checks for undefined/ambiguous steps only |
 | `npm run test:headed` | Headed browser |
 | `npm run test:chromium` / `test:firefox` / `test:webkit` | Pick a browser |
