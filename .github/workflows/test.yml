@@ -1,0 +1,75 @@
+name: Test
+
+on:
+  push:
+    branches: ['2.0.x']
+  pull_request:
+    branches: ['2.0.x']
+  workflow_dispatch:
+
+env:
+  FORCE_COLOR: '1'
+
+jobs:
+  cucumber:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - uses: ddev/github-action-setup-ddev@v1
+
+      - name: Start the DDEV-managed Odoo + PostgreSQL stack
+        run: ddev start
+
+      - name: Initialize the Odoo demo database
+        run: |
+          ddev exec -s odoo -- odoo -d demo --db_host=db --db_user=odoo --db_password=odoo \
+            --stop-after-init -i website,website_blog,website_sale,website_event,hr_recruitment
+
+      - name: Restart Odoo so it picks up the demo database
+        run: docker restart ddev-odoo-steps-odoo
+
+      - name: Wait for Odoo to accept connections
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8069/ || true)
+            [ "$code" = "200" ] && exit 0
+            sleep 2
+          done
+          echo "Odoo did not become ready in time" >&2
+          ddev logs -s odoo || true
+          exit 1
+
+      - name: Run cucumber dry-run (no ambiguous/undefined steps)
+        run: npm run test:dry
+
+      - name: Run Odoo step tests
+        env:
+          LAUNCH_URL: ${{ vars.LAUNCH_URL || 'http://localhost:8069' }}
+        run: npm test
+
+      - name: Show Odoo logs
+        if: always()
+        run: ddev logs -s odoo || true
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: |
+            tests/reports/cucumber_report.json
+            screenshots/
+          retention-days: 14

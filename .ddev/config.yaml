@@ -1,0 +1,4 @@
+name: odoo-steps
+type: generic
+docroot: ""
+omit_containers: [db]

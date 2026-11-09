@@ -1,0 +1,48 @@
+# Adds a self-hosted Odoo 17 + PostgreSQL stack as DDEV "additional services".
+# There is no official DDEV addon for Odoo, so this is a hand-rolled override —
+# see https://docs.ddev.com/en/stable/users/extend/custom-compose-files/
+services:
+  db:
+    container_name: "ddev-${DDEV_SITENAME}-db"
+    image: postgres:15-alpine
+    restart: "no"
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_DB=postgres
+    volumes:
+      - "odoo-db:/var/lib/postgresql/data"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+  odoo:
+    container_name: "ddev-${DDEV_SITENAME}-odoo"
+    image: odoo:17.0
+    restart: "no"
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    # Bound directly to localhost:8069 (bypassing ddev-router) so this repo's
+    # own cucumber.js default `launchUrl` (http://localhost:8069) needs no changes.
+    ports:
+      - "8069:8069"
+    # --workers: Odoo's default single-threaded dev server serializes all
+    # requests, including the live-chat/notification bus long-polling
+    # connection the browser opens — that connection can starve ordinary
+    # page navigations. Multiple workers avoid the resulting test hangs.
+    # HOST/USER/PASSWORD above are translated into --db_host/--db_user/--db_password
+    # by the image's entrypoint script; only pass what it doesn't already handle.
+    command: odoo --workers=2 --max-cron-threads=1
+    volumes:
+      - "odoo-web-data:/var/lib/odoo"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+volumes:
+  odoo-db:
+  odoo-web-data:
