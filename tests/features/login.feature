@@ -10,9 +10,8 @@ Feature: Odoo login
 
   @critical
   Scenario: The administrator account can log in to the backend
-    Given I am on the Odoo login page
-     When I log in to Odoo as "admin" with password "admin"
-     Then I should be on "/web"
+    Given I am a logged in user with the "admin" user
+     Then the path should be "/web"
 
   Scenario: An invalid login shows an authentication error
     Given I am on the Odoo login page

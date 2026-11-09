@@ -20,6 +20,8 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 
 See [tests/step-definitions/odoo.steps.js](tests/step-definitions/odoo.steps.js) for the full list of steps with Gherkin examples.
 
+The word "Odoo" is optional in every sentence: `Then I should see the top menu` and `Then I should see the Odoo top menu` are the same step, so a feature written for another webship-js step pack reads the same here. Every assertion takes `not` (`Then I should not see the login form`), waits for the page rather than reading it once, and fails with a message that says what was expected, why it failed and what to check.
+
 ## Requirements
 
 - Node.js >= 20
@@ -100,6 +102,7 @@ Other scripts:
 | --- | --- |
 | `npm test` | Full suite, pretty output |
 | `npm run test:dry` | `--dry-run` — checks for undefined/ambiguous steps only |
+| `npm run test:examples` | No browser: every step's JSDoc carries five `Example #n:` lines that match its own definition and no other, and every feature step resolves to exactly one definition (also runs in CI) |
 | `npm run test:headed` | Headed browser |
 | `npm run test:chromium` / `test:firefox` / `test:webkit` | Pick a browser |
 
