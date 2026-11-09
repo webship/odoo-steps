@@ -18,3 +18,11 @@ Feature: Odoo login
     Given I am on the Odoo login page
      When I log in to Odoo as "not-a-real-user@example.com" with password "wrong-password"
      Then I should see an Odoo login error
+
+  # Credentials come from worldParameters.users in cucumber.js (overridable
+  # with ODOO_ADMIN_USER / ODOO_ADMIN_PASSWORD), so no password appears here.
+  Scenario: A configured user starts an authenticated session and can end it
+    Given I am a logged in user with the "admin" user
+    Then the path should not be "/web/login"
+    When I am not logged in
+    Then I should see the Odoo login form

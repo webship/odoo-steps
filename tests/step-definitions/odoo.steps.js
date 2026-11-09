@@ -25,6 +25,30 @@ const { Given, When, Then } = require('@cucumber/cucumber');
 const assert = require('assert');
 const { gotoUrl, waitForPageLoad, fillField } = require('webship-js/tests/step-definitions/webship');
 
+// Fill and submit Odoo's login form. The submit is dispatched from inside the
+// page rather than with a pointer click: a fixed overlay (a cookie bar, a chat
+// widget) can cover the button and make a real click wait out its
+// actionability timeout, while the form's own submit cannot be covered.
+// A successful login redirects to the backend webclient (/web), which keeps a
+// permanent longpoll connection open (Discuss/bus), so networkidle never
+// fires there and the shared settle helpers would not settle: wait for the
+// navigation and DOM content only. An invalid login stays on /web/login
+// without a full navigation, so this resolves quickly either way.
+async function submitLogin(page, username, password) {
+  await fillField(page, 'login', username);
+  await fillField(page, 'password', password);
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {}),
+    page.evaluate(() => {
+      const form = document.querySelector('form[action="/web/login"]');
+      const submit = form && form.querySelector('button[type="submit"]');
+      if (submit) { submit.click(); return; }
+      if (form) form.submit();
+    }),
+  ]);
+  await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+}
+
 // ---------------------------------------------------------------------------
 // Core layout: #wrapwrap, top menu, footer
 // ---------------------------------------------------------------------------
@@ -472,17 +496,61 @@ Then(/^(I |we )*should see the Odoo (?:sign-?in|login) form$/, async function (p
  *
  */
 When(/^(I |we )*(?:log in|sign in) to Odoo as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
-  await fillField(this.page, 'login', username);
-  await fillField(this.page, 'password', password);
-  await this.page.locator('form[action="/web/login"] button[type="submit"]').first().click();
-  // A successful login redirects to the backend webclient (/web), which
-  // keeps a permanent longpoll connection open (Discuss/bus) — so
-  // networkidle never fires there and the shared waitForPageLoad()/
-  // smartSettle() helper (built around network-idle + ajax-quiet
-  // detection) will not settle. Wait for DOM content only instead; an
-  // invalid login stays on /web/login without a full navigation, so this
-  // resolves quickly either way.
-  await this.page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+  await submitLogin(this.page, username, password);
+});
+
+/**
+ * Log in as a user configured in cucumber.js `worldParameters.users`, so no
+ * password appears in a feature file. Each key names one account:
+ * `{ admin: { username: 'admin', password: process.env.ODOO_ADMIN_PASSWORD } }`.
+ * The login screen is opened first, so this step works from any page.
+ *
+ * Example #1: Given I am a logged in user with the "admin" user
+ * Example #2: Given I am a logged in user with the username "admin"
+ * Example #3: Given we are a logged in user with "portal"
+ * Example #4: And a logged in user with the "admin" user
+ * Example #5: Given I am a logged in user with the username "demo" user
+ *
+ */
+Given(/^(I am |we are )*a logged in user with( the)*( username)* "([^"]*)?"( user)*$/, async function (pronounCase, theCase, usernameCase, userKey, userCase) {
+  const users = (this.parameters && this.parameters.users) || {};
+  const entry = users[userKey];
+  if (!entry) {
+    throw new Error(`User "${userKey}" is not configured. Add it to worldParameters.users in cucumber.js. Known users: ${Object.keys(users).join(', ') || '(none)'}.`);
+  }
+  const username = entry.username || userKey;
+  const password = typeof entry === 'string' ? entry : entry.password;
+  if (!password) {
+    throw new Error(`User "${userKey}" has no password configured. Set worldParameters.users.${userKey}.password in cucumber.js, ideally from an environment variable.`);
+  }
+  await gotoUrl(this.page, this.launchUrl + '/web/login');
+  await this.page.locator('#login').waitFor({ state: 'visible', timeout: 10000 });
+  await submitLogin(this.page, username, password);
+});
+
+/**
+ * End any authenticated session and land on the login screen as a visitor:
+ * cookies and web storage are cleared, `/web/login` is opened and the core
+ * login form is confirmed. Use it at the start of a scenario that must run
+ * anonymously after an earlier one logged in.
+ *
+ * Example #1: Given I am not logged in
+ * Example #2: Given we are not logged in
+ * Example #3: And I am not logged in
+ * Example #4: Given not logged in
+ * Example #5: But I am not logged in
+ *
+ */
+Given(/^(I am |we are )*not logged in$/, async function (pronounCase) {
+  await this.context.clearCookies();
+  try {
+    await this.page.evaluate(() => {
+      try { localStorage.clear(); } catch { /* storage may be unavailable */ }
+      try { sessionStorage.clear(); } catch { /* storage may be unavailable */ }
+    });
+  } catch { /* the page may not be on a real URL yet */ }
+  await gotoUrl(this.page, this.launchUrl + '/web/login');
+  await this.page.locator('form[action="/web/login"]').waitFor({ state: 'visible', timeout: 10000 });
 });
 
 /**

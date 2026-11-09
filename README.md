@@ -15,6 +15,7 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 - Jobs listing
 - `/contactus` form
 - `/web/login` login form + authentication (and the invalid-login error path)
+- Sessions — log in as a named account from `worldParameters.users`, submit the login form robustly (an in-page submit that an overlay cannot block), and `Given I am not logged in` to end a session and land on the login form; for fast suites, snapshot an authenticated session once with webship-js's own `save the auth state` / `restore the auth state` steps
 - 404 page
 
 See [tests/step-definitions/odoo.steps.js](tests/step-definitions/odoo.steps.js) for the full list of steps with Gherkin examples.
@@ -43,6 +44,14 @@ module.exports = {
     paths: ['tests/features/**/*.feature'],
     worldParameters: {
       launchUrl: process.env.LAUNCH_URL || 'https://your-odoo-site.example',
+      // Named accounts for `Given I am a logged in user with the "<key>" user`.
+      // Keeps passwords out of feature files; override per environment.
+      users: {
+        admin: {
+          username: process.env.ODOO_ADMIN_USER || 'admin',
+          password: process.env.ODOO_ADMIN_PASSWORD || 'admin',
+        },
+      },
       // ...
     },
   },

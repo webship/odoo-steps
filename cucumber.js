@@ -26,6 +26,14 @@ module.exports = {
     },
     worldParameters: {
       launchUrl: process.env.LAUNCH_URL || 'http://localhost:8069',
+      // Accounts for `Given I am a logged in user with the "<key>" user`.
+      // Keeps passwords out of feature files; override per environment.
+      users: {
+        admin: {
+          username: process.env.ODOO_ADMIN_USER || 'admin',
+          password: process.env.ODOO_ADMIN_PASSWORD || 'admin',
+        },
+      },
       minWaitTime: {
         page: 3000,
         before_scenario: 0,
