@@ -31,10 +31,6 @@ const config: PlaywrightConfig = {
   contextOptions: {
     viewport: { width: 1600, height: 1200 },
     ignoreHTTPSErrors: true,
-    // www.odoo.com's bot-detection blocks Playwright's default headless
-    // Chromium UA string with a 403 — a realistic desktop UA passes.
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   },
 };
 

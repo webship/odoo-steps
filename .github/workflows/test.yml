@@ -13,6 +13,7 @@ env:
 jobs:
   cucumber:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
@@ -28,51 +29,42 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - uses: ddev/github-action-setup-ddev@v1
+      - name: Install DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
 
-      - name: Start the DDEV-managed Odoo + PostgreSQL stack
+      - name: Trust DDEV's local certificate authority in Node (the status-code checks use it)
+        run: echo "NODE_EXTRA_CA_CERTS=$(mkcert -CAROOT)/rootCA.pem" >> "$GITHUB_ENV"
+
+      - name: Start Odoo 17.0 and PostgreSQL with DDEV
         run: ddev start
 
-      - name: Initialize the Odoo demo database
-        run: |
-          ddev exec -s odoo -- odoo -d demo --db_host=db --db_user=odoo --db_password=odoo \
-            --stop-after-init -i website,website_blog,website_sale,website_event,hr_recruitment
-
-      - name: Restart Odoo so it picks up the demo database
-        run: docker restart ddev-odoo-steps-odoo
-
-      - name: Wait for Odoo to accept connections
-        run: |
-          for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8069/ || true)
-            [ "$code" = "200" ] && exit 0
-            sleep 2
-          done
-          echo "Odoo did not become ready in time" >&2
-          ddev logs -s odoo || true
-          exit 1
+      - name: Build the Odoo site (demo data, apps, accounts of the users registry)
+        run: bash scripts/build-odoo.sh
 
       - name: Check the step examples and feature steps against the definitions
         run: npm run test:examples
 
-      - name: Run cucumber dry-run (no ambiguous/undefined steps)
+      - name: Run cucumber dry-run (no ambiguous or undefined step)
         run: npm run test:dry
 
-      - name: Run Odoo step tests
+      - name: Run the suite against the Odoo site
         env:
-          LAUNCH_URL: ${{ vars.LAUNCH_URL || 'http://localhost:8069' }}
+          LAUNCH_URL: https://odoo-steps.ddev.site
         run: npm test
 
-      - name: Show Odoo logs
+      - name: Show the Odoo log
         if: always()
-        run: ddev logs -s odoo || true
+        run: ddev logs -s odoo | tail -200 || true
 
-      - name: Upload test report
+      - name: Upload the test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cucumber-report
           path: |
             tests/reports/cucumber_report.json
+            tests/reports/cucumber_report.html
             screenshots/
           retention-days: 14

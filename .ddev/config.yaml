@@ -2,3 +2,9 @@ name: odoo-steps
 type: generic
 docroot: ""
 omit_containers: [db]
+# Odoo answers on the project's own address, https://odoo-steps.ddev.site
+# (ports 80 and 443 of the DDEV router, see docker-compose.odoo.yaml). The
+# generic web container DDEV always starts is not used and moves to other
+# ports.
+router_http_port: "8880"
+router_https_port: "8843"

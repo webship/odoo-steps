@@ -1,3 +1,14 @@
+// One account of the users registry. The login and the password default to
+// the handle and can be set per environment: ODOO_<HANDLE>_USER and
+// ODOO_<HANDLE>_PASSWORD, for example ODOO_ADMIN_PASSWORD.
+function account(handle) {
+  const key = handle.toUpperCase();
+  return {
+    username: process.env[`ODOO_${key}_USER`] || handle,
+    password: process.env[`ODOO_${key}_PASSWORD`] || handle,
+  };
+}
+
 module.exports = {
   default: {
     // The step timeout is webship-js's (45 s, set when it loads): WEBSHIP_STEP_TIMEOUT=<milliseconds> changes it; a `timeout` key here is ignored.
@@ -10,7 +21,7 @@ module.exports = {
     // FEATURES=tests/features/a.feature,tests/features/b.feature runs a subset.
     paths: process.env.FEATURES ? process.env.FEATURES.split(',') : ['tests/features/**/*.feature'],
     // CUCUMBER_TAGS=@critical runs a lane; the default keeps work-in-progress out.
-    tags: process.env.CUCUMBER_TAGS || 'not @requires-app and not @wip',
+    tags: process.env.CUCUMBER_TAGS || 'not @wip',
     format: [
       '@cucumber/pretty-formatter',
       'json:tests/reports/cucumber_report.json',
@@ -27,18 +38,24 @@ module.exports = {
       },
     },
     worldParameters: {
-      launchUrl: process.env.LAUNCH_URL || 'http://localhost:8069',
+      // The local DDEV site of this repository (.ddev/); LAUNCH_URL points the
+      // suite at another Odoo site.
+      launchUrl: process.env.LAUNCH_URL || 'https://odoo-steps.ddev.site',
       // Video of the browser: 'off', 'on', 'on-failure' or 'tag' (scenarios tagged @video; @no-video opts out).
       video: { mode: process.env.WEBSHIP_VIDEO || 'off', dir: './videos', size: { width: 1280, height: 720 }, filenamePattern: '{datetime}.{feature_file}.{scenario}.{status}.{ext}' },
       // JavaScript errors the page raises: 'warn' reports them, 'fail' fails the scenario, 'off' ignores them; @js-fail, @js-warn and @js-off per scenario.
       javascript: { mode: process.env.WEBSHIP_JS_ERROR_MODE || 'warn', levels: ['error'], ignore: '', beforeScenario: false, afterScenario: true },
-      // Accounts for `Given I am a logged in user with the "<key>" user`.
-      // Keeps passwords out of feature files; override per environment.
+      // The users registry: a handle a feature can read, mapped to a real account.
+      // Keeps passwords out of feature files; override per environment with
+      // ODOO_<HANDLE>_USER and ODOO_<HANDLE>_PASSWORD, for example ODOO_ADMIN_PASSWORD.
+      // Accounts are configuration, created once on the site
+      // (scripts/build-odoo.sh); a feature never creates or deletes one.
       users: {
-        admin: {
-          username: process.env.ODOO_ADMIN_USER || 'admin',
-          password: process.env.ODOO_ADMIN_PASSWORD || 'admin',
-        },
+        admin: account('admin'),             // Administrator: every app.
+        salesperson: account('salesperson'), // Sales and CRM, own documents only; no Invoicing.
+        accountant: account('accountant'),   // Invoicing; no Sales, no CRM.
+        employee: account('employee'),       // Internal user with no app-specific group.
+        portal: account('portal'),           // Portal user: the website and /my, never the web client.
       },
       minWaitTime: {
         page: 3000,
