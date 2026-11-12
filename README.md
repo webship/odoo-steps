@@ -45,7 +45,7 @@ module.exports = {
     ],
     paths: ['tests/features/**/*.feature'],
     worldParameters: {
-      launchUrl: process.env.LAUNCH_URL || 'https://your-odoo-site.example',
+      launchUrl: process.env.LAUNCH_URL || 'https://your-project.ddev.site',
       // Named accounts for `Given I am a logged in user with the "<key>" user`.
       // Keeps passwords out of feature files; override per environment.
       users: {
@@ -80,21 +80,33 @@ More runnable examples: [tests/features/](tests/features/).
 
 ## Running this repo's own test suite
 
-This repository is itself a working webship-js project — its `tests/features/*.feature` files run by default against a **self-hosted Odoo 17 instance managed by [DDEV](https://ddev.com/)** (`.ddev/`), seeded with Odoo's own demo data for Website, Blog, eCommerce, Events and Jobs. Public Odoo-built sites' bot-detection blocks and rate-limits automated CI traffic, so this repo never targets one.
+This repository is itself a working webship-js project. Its suite runs against an Odoo 17.0 Community site that [DDEV](https://ddev.com/) starts from `.ddev/` and `scripts/build-odoo.sh` builds: a database with Odoo's demo data, the apps the features use (Contacts, CRM, Sales, Invoicing, Website with its blog, shop, events and jobs) and the accounts of the users registry in `cucumber.js`. The suite never targets a site outside the machine it runs on.
 
 ```bash
-ddev start
-ddev exec -s odoo -- odoo -d demo --db_host=db --db_user=odoo --db_password=odoo \
-  --stop-after-init -i website,website_blog,website_sale,website_event,hr_recruitment
-docker restart ddev-odoo-steps-odoo   # pick up the demo database
+ddev start                      # Odoo 17.0 and PostgreSQL, at https://odoo-steps.ddev.site
+bash scripts/build-odoo.sh      # demo data, apps, accounts
 
 npm install
 npx playwright install --with-deps chromium
-npm test                       # runs against http://localhost:8069
-LAUNCH_URL=https://your-site.example npm test   # runs against your own site instead
+export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"   # Node trusts DDEV's certificate
+npm test                        # runs against https://odoo-steps.ddev.site
 
-ddev delete -Oy odoo-steps     # tear down when done
+ddev delete -Oy odoo-steps      # remove the site when done
 ```
+
+`LAUNCH_URL=https://another-odoo.example npm test` points the suite at another site.
+
+The accounts `scripts/build-odoo.sh` creates (the password of each is its login, on this local site only):
+
+| Handle | Login | Groups |
+| --- | --- | --- |
+| `admin` | `admin` | Administrator |
+| `salesperson` | `salesperson` | Sales: own documents only |
+| `accountant` | `accountant` | Invoicing: billing |
+| `employee` | `employee` | Internal user, no app-specific group |
+| `portal` | `portal` | Portal |
+
+Accounts are configuration: they are created once when the site is built and named in `worldParameters.users`; a feature never creates one. The build also uninstalls the `partner_autocomplete` module, which sends what a user types in a company name to an outside service.
 
 Other scripts:
 
@@ -116,6 +128,6 @@ MIT © Webship.co — see [LICENSE](LICENSE).
 
 ### Lanes, subsets and the settings webship-js reads
 
-- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs a subset of the feature files; `CUCUMBER_TAGS=@critical npm test` runs a tag lane (the default run leaves `@wip` out).
+- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs a subset of the feature files; `CUCUMBER_TAGS=@critical npm test` runs a tag lane (the default run leaves `@wip` out). `ODOO_<HANDLE>_USER` and `ODOO_<HANDLE>_PASSWORD` set the login and the password of a registry account.
 - `cucumber.js` carries the `video` block (`WEBSHIP_VIDEO=on-failure` records the browser) and the `javascript` block (`WEBSHIP_JS_ERROR_MODE=fail` fails a scenario on a JavaScript error; `@js-off` silences one scenario) that webship-js reads.
 - The step timeout is webship-js's own (45 seconds, set when it loads); `WEBSHIP_STEP_TIMEOUT=<milliseconds>` changes it, a `timeout` key in `cucumber.js` does not.

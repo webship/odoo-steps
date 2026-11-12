@@ -1,9 +1,9 @@
-# Adds a self-hosted Odoo 17 + PostgreSQL stack as DDEV "additional services".
-# There is no official DDEV addon for Odoo, so this is a hand-rolled override —
-# see https://docs.ddev.com/en/stable/users/extend/custom-compose-files/
+# Odoo 17.0 Community and PostgreSQL as additional DDEV services. DDEV has no
+# project type for Odoo, so the two containers are declared here; see
+# https://docs.ddev.com/en/stable/users/extend/custom-compose-files/
 services:
-  db:
-    container_name: "ddev-${DDEV_SITENAME}-db"
+  postgres:
+    container_name: "ddev-${DDEV_SITENAME}-postgres"
     image: postgres:15-alpine
     restart: "no"
     environment:
@@ -21,22 +21,28 @@ services:
     image: odoo:17.0
     restart: "no"
     depends_on:
-      - db
+      - postgres
     environment:
-      - HOST=db
+      # The image's entrypoint turns these three into the database options.
+      - HOST=postgres
       - USER=odoo
       - PASSWORD=odoo
-    # Bound directly to localhost:8069 (bypassing ddev-router) so this repo's
-    # own cucumber.js default `launchUrl` (http://localhost:8069) needs no changes.
-    ports:
-      - "8069:8069"
-    # --workers: Odoo's default single-threaded dev server serializes all
-    # requests, including the live-chat/notification bus long-polling
-    # connection the browser opens — that connection can starve ordinary
-    # page navigations. Multiple workers avoid the resulting test hangs.
-    # HOST/USER/PASSWORD above are translated into --db_host/--db_user/--db_password
-    # by the image's entrypoint script; only pass what it doesn't already handle.
-    command: odoo --workers=2 --max-cron-threads=1
+      # The project name, for scripts/build-odoo.sh.
+      - DDEV_SITENAME=${DDEV_SITENAME}
+      # The DDEV router serves Odoo's port 8069 on the project's address.
+      - VIRTUAL_HOST=$DDEV_HOSTNAME
+      - HTTP_EXPOSE=80:8069
+      - HTTPS_EXPOSE=443:8069
+    expose:
+      - "8069"
+    # --proxy-mode: Odoo sits behind the DDEV router and reads the scheme and
+    #   the host from the forwarded headers, so its links are https.
+    # --db-filter: one database only, so visitors are never sent to the
+    #   database selector.
+    # No --workers: in its default threaded mode Odoo serves the pages and the
+    #   websocket of the bus on the same port, which is the one the router
+    #   exposes.
+    command: odoo --proxy-mode --db-filter=^odoo$$ --max-cron-threads=1
     volumes:
       - "odoo-web-data:/var/lib/odoo"
     labels:

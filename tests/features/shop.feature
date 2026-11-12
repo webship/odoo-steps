@@ -1,7 +1,3 @@
-# Requires the website_sale app. Not installed on the default Odoo Website
-# install (only "website" + theme_default) — excluded from the default run
-# via the "not @requires-app" tag expression in cucumber.js.
-@requires-app
 Feature: Odoo shop
   As an anonymous visitor
   I want to browse and search the Odoo shop
