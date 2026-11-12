@@ -1,6 +1,6 @@
 {
   "name": "@webship-js/odoo-steps",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Odoo step definitions for webship-js (Playwright and Cucumber): sessions and the users registry, apps and menus, the search, list, kanban and form views, dialogs, notifications, the chatter, access rights and the website.",
   "main": "tests/step-definitions/odoo.steps.js",
   "files": [
