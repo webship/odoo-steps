@@ -18,6 +18,7 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 - Sessions: log in as a user of the registry in `worldParameters.users` (a refused login fails in that step, with the message of the form), log out from the user menu, `I should be logged in as "..."`, the web client and the portal, the entries of the user menu, and `Given I am not logged in` to start as a visitor; `worldParameters.odoo.database` selects the database on a server that holds several
 - 404 page
 - The web client: the apps menu and opening an app, a menu path (`Orders > Quotations`), an action by its external ID, the breadcrumb, the view switcher; the search view (search, search in a named field, filters, grouping, facets); the list view (records, opening a record, counting, selection, groups, the pager, the Actions menu); the kanban view (columns, cards, dragging a card to another column)
+- Records: a new record, the fields of a form by their label (text, number, date, selection, many2one, tags, checkbox, radio, priority), saving, a refused save, discarding, the buttons and the status bar of a form, tabs, the lines of a list inside the form; dialogs and the access error; notifications; the chatter (a note, a message)
 
 See [tests/step-definitions/](tests/step-definitions/) for the full list of steps with Gherkin examples.
 
