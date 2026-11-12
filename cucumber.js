@@ -57,6 +57,11 @@ module.exports = {
         employee: account('employee'),       // Internal user with no app-specific group.
         portal: account('portal'),           // Portal user: the website and /my, never the web client.
       },
+      // Odoo settings. `database` selects one database on a server that holds
+      // several (the login screen is then opened as /web/login?db=<name>).
+      odoo: {
+        database: process.env.ODOO_DATABASE || '',
+      },
       minWaitTime: {
         page: 3000,
         before_scenario: 0,

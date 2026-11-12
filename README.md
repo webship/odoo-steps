@@ -15,10 +15,10 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 - Jobs listing
 - `/contactus` form
 - `/web/login` login form + authentication (and the invalid-login error path)
-- Sessions — log in as a named account from `worldParameters.users`, submit the login form robustly (an in-page submit that an overlay cannot block), and `Given I am not logged in` to end a session and land on the login form; for fast suites, snapshot an authenticated session once with webship-js's own `save the auth state` / `restore the auth state` steps
+- Sessions: log in as a user of the registry in `worldParameters.users` (a refused login fails in that step, with the message of the form), log out from the user menu, `I should be logged in as "..."`, the web client and the portal, the entries of the user menu, and `Given I am not logged in` to start as a visitor; `worldParameters.odoo.database` selects the database on a server that holds several
 - 404 page
 
-See [tests/step-definitions/odoo.steps.js](tests/step-definitions/odoo.steps.js) for the full list of steps with Gherkin examples.
+See [tests/step-definitions/](tests/step-definitions/) for the full list of steps with Gherkin examples.
 
 The word "Odoo" is optional in every sentence: `Then I should see the top menu` and `Then I should see the Odoo top menu` are the same step, so a feature written for another webship-js step pack reads the same here. Every assertion takes `not` (`Then I should not see the login form`), waits for the page rather than reading it once, and fails with a message that says what was expected, why it failed and what to check.
 
@@ -128,6 +128,6 @@ MIT © Webship.co — see [LICENSE](LICENSE).
 
 ### Lanes, subsets and the settings webship-js reads
 
-- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs a subset of the feature files; `CUCUMBER_TAGS=@critical npm test` runs a tag lane (the default run leaves `@wip` out). `ODOO_<HANDLE>_USER` and `ODOO_<HANDLE>_PASSWORD` set the login and the password of a registry account.
+- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs a subset of the feature files; `CUCUMBER_TAGS=@critical npm test` runs a tag lane (the default run leaves `@wip` out). `ODOO_<HANDLE>_USER` and `ODOO_<HANDLE>_PASSWORD` set the login and the password of a registry account, and `ODOO_DATABASE` names the database on a server that holds several.
 - `cucumber.js` carries the `video` block (`WEBSHIP_VIDEO=on-failure` records the browser) and the `javascript` block (`WEBSHIP_JS_ERROR_MODE=fail` fails a scenario on a JavaScript error; `@js-off` silences one scenario) that webship-js reads.
 - The step timeout is webship-js's own (45 seconds, set when it loads); `WEBSHIP_STEP_TIMEOUT=<milliseconds>` changes it, a `timeout` key in `cucumber.js` does not.
