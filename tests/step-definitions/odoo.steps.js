@@ -5,9 +5,11 @@
 // Events, Jobs and core web-login modules bundled with it) renders on every
 // Odoo site: the #wrapwrap/#top_menu layout, o_wblog_* blog templates,
 // o_wsale_* eCommerce templates, o_wevent_* events templates, o_jobs
-// recruitment templates, s_website_form snippet forms, and the core
-// /web/login screen. Scenarios assert against the main pages of an Odoo site
-// without hand-rolling CSS selectors in every feature file.
+// recruitment templates and s_website_form snippet forms. Scenarios assert
+// against the main pages of an Odoo site without hand-rolling CSS selectors
+// in every feature file. The session steps (the login screen, the users
+// registry, logging out) are in odoo-session.steps.js; odoo-helpers.js holds
+// what the step files share.
 //
 // The Gherkin phrasing stays product-agnostic: the word "Odoo" is optional in
 // every sentence ("I should see the top menu" and "I should see the Odoo top
@@ -22,112 +24,9 @@
 // be "/web"").
 
 const { Given, When, Then } = require('@cucumber/cucumber');
-const { gotoUrl, waitForPageLoad, fillField, friendly } = require('webship-js/tests/step-definitions/webship');
+const { waitForPageLoad, friendly } = require('webship-js/tests/step-definitions/webship');
+const { WAIT_TIMEOUT, budget, navigate, assertPresence, assertText } = require('./odoo-helpers');
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-// Kept well under webship-js's 45s step timeout so a locator that never
-// settles fails through the authored message (with its hint), not as
-// "function timed out".
-const WAIT_TIMEOUT = 30000;
-
-// The per-page wait budget from `worldParameters.minWaitTime.page`.
-function budget(world) {
-  return (world && world.minWaitTime && world.minWaitTime.page) || 3000;
-}
-
-// Join the launch URL and a path with exactly one slash.
-function siteUrl(world, path) {
-  return String(world.launchUrl).replace(/\/+$/, '') + '/' + String(path).replace(/^\/+/, '');
-}
-
-// Open a path on the site under test and wait for the page to settle.
-async function navigate(world, path) {
-  await gotoUrl(world.page, siteUrl(world, path));
-  await world.page.waitForSelector('body', { state: 'attached', timeout: WAIT_TIMEOUT });
-  await waitForPageLoad(world.page, budget(world));
-}
-
-// Assert an element is present or, when the step said "not", absent. The
-// assertion is the wait: Playwright polls the locator for the wanted state and
-// a miss fails through a friendly message with a hint. `attached` picks
-// presence-in-DOM over visibility for template markers a theme may render
-// off-screen.
-async function assertPresence(locator, notCase, label, { attached = false, hint, timeout = WAIT_TIMEOUT } = {}) {
-  const state = attached ? (notCase ? 'detached' : 'attached') : (notCase ? 'hidden' : 'visible');
-  try {
-    await locator.waitFor({ state, timeout });
-  } catch (error) {
-    throw friendly({
-      message: notCase ? `Expected ${label} to be absent.` : `Expected ${label} to be present.`,
-      cause: error,
-      hint,
-    });
-  }
-}
-
-// Whitespace-tolerant, case-sensitive regex for "contains this text", so a
-// Playwright `hasText` filter can be the wait.
-function textPattern(text, { exact = false } = {}) {
-  const body = text.trim().split(/\s+/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+');
-  return new RegExp(exact ? `^\\s*${body}\\s*$` : body);
-}
-
-// Assert a locator's text contains (or, with `notCase`, does not contain) the
-// expected text: the locator is narrowed to "has this text" and Playwright
-// polls for that narrowed set to exist or to be gone.
-async function assertText(locator, expectedText, notCase, label, { exact = false, hint, timeout = WAIT_TIMEOUT } = {}) {
-  const withText = locator.filter({ hasText: textPattern(expectedText, { exact }) });
-  try {
-    await withText.waitFor({ state: notCase ? 'detached' : 'attached', timeout });
-  } catch (error) {
-    const text = ((await locator.textContent({ timeout: 1000 }).catch(() => '')) || '').replace(/\s+/g, ' ').trim();
-    throw friendly({
-      message: notCase
-        ? `Expected ${label} not to ${exact ? 'read' : 'contain'} "${expectedText}".`
-        : `Expected ${label} to ${exact ? 'read' : 'contain'} "${expectedText}".`,
-      cause: `it reads "${text}"`,
-      hint,
-    });
-  }
-}
-
-// Fill and submit Odoo's login form. The submit is dispatched from inside the
-// page rather than with a pointer click: a fixed overlay (a cookie bar, a chat
-// widget) can cover the button and make a real click wait out its
-// actionability timeout, while the form's own submit cannot be covered.
-// A successful login redirects to the backend webclient (/web), which keeps a
-// permanent longpoll connection open (Discuss/bus), so networkidle never
-// fires there and the shared settle helpers would not settle: wait for the
-// navigation and DOM content only. An invalid login stays on /web/login
-// without a full navigation, so this resolves quickly either way.
-async function submitLogin(world, username, password) {
-  const page = world.page;
-  try {
-    await page.locator('#login').waitFor({ state: 'visible', timeout: budget(world) });
-  } catch (error) {
-    throw friendly({
-      action: 'find the login form',
-      target: 'form[action="/web/login"]',
-      cause: error,
-      hint: 'Open the login page first ("Given I am on the login page"); a site that replaces /web/login needs its own step.',
-    });
-  }
-  await fillField(page, 'login', username);
-  await fillField(page, 'password', password);
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {}),
-    page.evaluate(() => {
-      const form = document.querySelector('form[action="/web/login"]');
-      const submit = form && form.querySelector('button[type="submit"]');
-      if (submit) { submit.click(); return; }
-      if (form) form.submit();
-    }),
-  ]);
-  await page.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
-}
 
 // ---------------------------------------------------------------------------
 // Core layout: #wrapwrap, top menu, footer
@@ -550,154 +449,6 @@ Then(/^(I |we )*should( not)* see the (?:Odoo )?(?:"contact us"|contact[ -]?us|c
   await assertPresence(this.page.locator('#contactus_form'), notCase, 'the contact-us form ("#contactus_form")', {
     hint: 'The default /contactus page renders the form snippet with this id; a redesigned page may have dropped or renamed it.',
   });
-});
-
-// ---------------------------------------------------------------------------
-// /web/login: authentication
-// ---------------------------------------------------------------------------
-
-/**
- * Navigate to the core login screen at `/web/login`. This template is shared
- * by every Odoo installation (Community and Enterprise alike): it ships in
- * the base "web" module, not the Website builder.
- *
- * Example #1: Given I am on the Odoo login page
- * Example #2: Given we are on the login page
- * Example #3: Given I am on the sign in page
- * Example #4: And on the Odoo sign-in page
- * Example #5: Given I am on the web/login page
- *
- */
-Given(/^(I am |we are )*on the (?:Odoo )?(?:sign[- ]?in|web\/login|login) page$/, async function (pronounCase) {
-  await navigate(this, '/web/login');
-});
-
-/**
- * Assert the core login form is, or is not, visible: the form posting to
- * `/web/login`, with its `#login` and `#password` fields (`addons/web`'s
- * `webclient_templates.xml`, unchanged across Odoo versions). Each part is
- * checked separately so a failure names which one is missing.
- *
- * Example #1: Then I should see the Odoo login form
- * Example #2: And I should see the sign in form
- * Example #3: Then we should see the login form
- * Example #4: And should not see the login form
- * Example #5: Then I should see the Odoo sign-in form
- *
- */
-Then(/^(I |we )*should( not)* see the (?:Odoo )?(?:sign[- ]?in|login) form$/, async function (pronounCase, notCase) {
-  const hint = 'The core login screen is /web/login; an authenticated session is redirected away from it to /web.';
-  await assertPresence(this.page.locator('form[action="/web/login"]'), notCase, 'the login form ("form[action=\\"/web/login\\"]")', { hint });
-  if (notCase) return;
-  await assertPresence(this.page.locator('#login'), undefined, 'the login/email field ("#login")', { hint, timeout: 5000 });
-  await assertPresence(this.page.locator('#password'), undefined, 'the password field ("#password")', { hint, timeout: 5000 });
-});
-
-/**
- * Fill and submit the core login form with the given username/email and
- * password (`#login`, `#password`, the form's submit button), for scenarios
- * where the credentials are the subject. Requires the login screen to be
- * open already.
- *
- * Example #1: When I log in to Odoo as "admin" with password "secret"
- * Example #2: When we log in as "demo@example.com" with password "p@ssw0rd"
- * Example #3: And I sign in to Odoo as "admin" with password "secret"
- * Example #4: When we sign-in as "reviewer" with password "hunter2"
- * Example #5: And log in as "portal_user" with password "letmein"
- *
- */
-When(/^(I |we )*(?:log in|sign[- ]?in)(?: to Odoo)? as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
-  await submitLogin(this, username, password);
-});
-
-/**
- * Log in as a user configured in cucumber.js `worldParameters.users`, so no
- * password appears in a feature file. Each key names one account:
- * `{ admin: { username: 'admin', password: process.env.ODOO_ADMIN_PASSWORD } }`.
- * The login screen is opened first, so this step works from any page.
- *
- * Example #1: Given I am a logged in user with the "admin" user
- * Example #2: Given I am a logged in user with the username "admin"
- * Example #3: Given we are a logged in user with "portal"
- * Example #4: And a logged in user with the "admin" user
- * Example #5: Given I am a logged in user with the username "demo" user
- *
- */
-Given(/^(I am |we are )*a logged in user with( the)*( username)* "([^"]*)?"( user)*$/, async function (pronounCase, theCase, usernameCase, userKey, userCase) {
-  const users = (this.parameters && this.parameters.users) || {};
-  const entry = users[userKey];
-  if (!entry) {
-    throw friendly({
-      message: `User "${userKey}" is not configured.`,
-      hint: `Add it to worldParameters.users in cucumber.js. Known users: ${Object.keys(users).join(', ') || '(none)'}.`,
-    });
-  }
-  const username = entry.username || userKey;
-  const password = typeof entry === 'string' ? entry : entry.password;
-  if (!password) {
-    throw friendly({
-      message: `User "${userKey}" has no password configured.`,
-      hint: `Set worldParameters.users.${userKey}.password in cucumber.js, ideally from an environment variable.`,
-    });
-  }
-  // Start from a fresh session: an authenticated visitor is redirected away
-  // from /web/login and would never see the form.
-  await this.context.clearCookies();
-  await navigate(this, '/web/login');
-  await submitLogin(this, username, password);
-});
-
-/**
- * End any authenticated session and land on the login screen as a visitor:
- * cookies and web storage are cleared, `/web/login` is opened and the core
- * login form is confirmed. Use it at the start of a scenario that must run
- * anonymously after an earlier one logged in.
- *
- * Example #1: Given I am not logged in
- * Example #2: Given we are not logged in
- * Example #3: And I am not logged in
- * Example #4: Given not logged in
- * Example #5: But I am not logged in
- *
- */
-Given(/^(I am |we are )*not logged in$/, async function (pronounCase) {
-  await this.context.clearCookies();
-  try {
-    await this.page.evaluate(() => {
-      try { localStorage.clear(); } catch { /* storage may be unavailable */ }
-      try { sessionStorage.clear(); } catch { /* storage may be unavailable */ }
-    });
-  } catch { /* the page may not be on a real URL yet */ }
-  await navigate(this, '/web/login');
-  await assertPresence(this.page.locator('form[action="/web/login"]'), undefined, 'the login form (the session should be anonymous)', {
-    timeout: 10000,
-    hint: 'An authenticated session is redirected from /web/login to /web; clearing the cookies should have ended it.',
-  });
-});
-
-/**
- * Assert the login screen is, or is not, showing an authentication error,
- * optionally containing a text. Matches the `.alert-danger` message the login
- * controller renders on invalid credentials.
- *
- * Example #1: Then I should see an Odoo login error
- * Example #2: And I should see a sign in error
- * Example #3: Then we should see a login error "Wrong login/password"
- * Example #4: And should not see a login error
- * Example #5: Then I should see an authentication error message
- *
- */
-Then(/^(I |we )*should( not)* see an? (?:Odoo )?(?:login|sign[- ]?in|authentication) error(?: message)?(?: "([^"]*)")?$/, async function (pronounCase, notCase, expectedText) {
-  const error = this.page.locator('form[action="/web/login"] .alert-danger, .alert-danger').first();
-  const hint = 'The core login screen renders the notice inside the form after a wrong login or password.';
-  if (notCase && !expectedText) {
-    await assertPresence(error, notCase, 'a login error message (".alert-danger")', { hint });
-    return;
-  }
-  await assertPresence(error, undefined, 'a login error message (".alert-danger")', { hint });
-  if (expectedText) {
-    await assertText(error, expectedText, notCase, 'the login error message', { hint });
-  }
 });
 
 // ---------------------------------------------------------------------------

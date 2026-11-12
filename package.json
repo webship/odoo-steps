@@ -4,7 +4,7 @@
   "description": "Odoo-specific Cucumber step definitions plugin for webship-js — BDD testing for the main pages of any Odoo Website site (Playwright + Cucumber).",
   "main": "tests/step-definitions/odoo.steps.js",
   "files": [
-    "tests/step-definitions/odoo.steps.js",
+    "tests/step-definitions/",
     "README.md",
     "LICENSE"
   ],
