@@ -10,10 +10,11 @@ It is a **plugin for webship-js** — it does not run standalone. It ships one f
 
 - Homepage / core Website layout (`#wrapwrap`, top menu, footer)
 - Blog index and single post
-- Shop index, search, product page, add-to-cart, cart badge
+- Shop index, search (with and without results), a product by its name, product page, add-to-cart, cart badge
 - Events index
 - Jobs listing
-- `/contactus` form
+- The contact form: filling it by its labels, sending it, its confirmation and its errors
+- The website editor: who may edit, opening the editor on a page, its building blocks, saving and discarding
 - `/web/login` login form + authentication (and the invalid-login error path)
 - Sessions: log in as a user of the registry in `worldParameters.users` (a refused login fails in that step, with the message of the form), log out from the user menu, `I should be logged in as "..."`, the web client and the portal, the entries of the user menu, and `Given I am not logged in` to start as a visitor; `worldParameters.odoo.database` selects the database on a server that holds several
 - 404 page

@@ -1,32 +1,36 @@
 'use strict';
 
-// Odoo-specific Cucumber step definitions for webship-js. These steps
-// understand the markup the Odoo Website builder (and the eCommerce, Blog,
-// Events, Jobs and core web-login modules bundled with it) renders on every
-// Odoo site: the #wrapwrap/#top_menu layout, o_wblog_* blog templates,
-// o_wsale_* eCommerce templates, o_wevent_* events templates, o_jobs
-// recruitment templates and s_website_form snippet forms. Scenarios assert
-// against the main pages of an Odoo site without hand-rolling CSS selectors
-// in every feature file. The session steps (the login screen, the users
-// registry, logging out) are in odoo-session.steps.js; odoo-helpers.js holds
-// what the step files share.
+// Website steps for Odoo: the pages the Website app and its companions (Blog,
+// eCommerce, Events, Jobs) serve to visitors. The steps know the markup these
+// apps render: the `#wrapwrap` layout with its top menu and footer, the blog
+// and shop templates, the events and jobs lists, the contact form and the 404
+// page.
 //
-// The Gherkin phrasing stays product-agnostic: the word "Odoo" is optional in
-// every sentence ("I should see the top menu" and "I should see the Odoo top
-// menu" are the same step), so a feature written for another step pack reads
-// the same here. Only these comments and the error messages name the product,
-// to document which convention each step targets.
+// The session steps are in odoo-session.steps.js, the web client steps in
+// odoo-webclient.steps.js and the record steps in odoo-record.steps.js;
+// odoo-helpers.js holds what they share.
 //
-// Composes with webship-js's built-in steps (navigation.steps.js,
-// assertion.steps.js, form.steps.js, response.steps.js, ...) rather than
-// duplicating them: use those directly in feature files wherever they already
-// cover the need ("the response status code should be 200", "the path should
-// be "/web"").
+// The word "Odoo" is optional in every sentence ("I should see the top menu"
+// and "I should see the Odoo top menu" are the same step), so a feature
+// written for another step pack reads the same here.
+//
+// The steps work next to webship-js's built-in steps and do not repeat them:
+// use those in a feature wherever they cover the need ("the response status
+// code should be 200", "the path should be "/shop"").
 
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { waitForPageLoad, friendly } = require('webship-js/tests/step-definitions/webship');
-const { WAIT_TIMEOUT, budget, navigate, assertPresence, assertText } = require('./odoo-helpers');
-
+const {
+  WAIT_TIMEOUT,
+  SHORT_TIMEOUT,
+  budget,
+  settle,
+  navigate,
+  assertPresence,
+  assertText,
+  listTexts,
+  textPattern,
+} = require('./odoo-helpers');
 
 // ---------------------------------------------------------------------------
 // Core layout: #wrapwrap, top menu, footer
@@ -263,27 +267,29 @@ When(/^(I |we )*search the (?:Odoo )?shop for "([^"]*)?"$/, async function (pron
 });
 
 /**
- * Assert the shop search returned results for the given term: the product
- * grid is present and the URL's `search` query parameter carries the term.
+ * Assert the shop search returned, or did not return, products for the given
+ * term: the URL's `search` parameter carries the term and the product grid
+ * lists at least one product (`#products_grid .oe_product`). With "not" the
+ * grid must list none.
  *
- * Example #1: Then I should see Odoo shop search results for "mug"
- * Example #2: And I should see shop search results for "polo shirt"
- * Example #3: Then we should see Odoo shop search results for "t-shirt"
- * Example #4: And should see shop search results for "backpack"
- * Example #5: Then I should see the shop search results for "notebook"
+ * Example #1: Then I should see Odoo shop search results for "desk"
+ * Example #2: And I should see shop search results for "office chair"
+ * Example #3: Then we should see Odoo shop search results for "cabinet"
+ * Example #4: And I should not see shop search results for "no-such-product"
+ * Example #5: Then I should see the shop search results for "lamp"
  *
  */
-Then(/^(I |we )*should see (?:the )?(?:Odoo )?shop search results for "([^"]*)?"$/, async function (pronounCase, term) {
+Then(/^(I |we )*should( not)* see (?:the )?(?:Odoo )?shop search results for "([^"]*)?"$/, async function (pronounCase, notCase, term) {
   await assertPresence(this.page.locator('#products_grid'), undefined, 'the shop product grid ("#products_grid")', {
     attached: true,
-    hint: 'A search that matches nothing still renders the grid with an empty-state message; a missing grid means the search left the shop.',
+    hint: 'A search that matches nothing still renders the grid, with a message in place of the products; a missing grid means the search left the shop.',
   });
   // A space reaches the URL as `+` or `%20` depending on whether the form or
   // a direct navigation submitted it.
   const encoded = encodeURIComponent(term);
   const carriesTerm = (url) => url.includes(`search=${encoded.replace(/%20/g, '+')}`) || url.includes(`search=${encoded}`);
   try {
-    await this.page.waitForURL((url) => carriesTerm(String(url)), { timeout: budget(this) });
+    await this.page.waitForURL((url) => carriesTerm(String(url)), { timeout: SHORT_TIMEOUT });
   } catch (error) {
     throw friendly({
       message: `Expected the shop URL to carry the search term "${term}".`,
@@ -291,6 +297,37 @@ Then(/^(I |we )*should see (?:the )?(?:Odoo )?shop search results for "([^"]*)?"
       hint: 'Run "When I search the shop for ..." first, with the same term.',
     });
   }
+  const products = this.page.locator('#products_grid .oe_product');
+  await assertPresence(products.first(), notCase, `a product in the shop grid for the search "${term}"`, {
+    attached: true,
+    timeout: SHORT_TIMEOUT,
+    hint: notCase
+      ? `The grid lists ${await listTexts(this.page.locator('#products_grid .o_wsale_products_item_title'))}.`
+      : 'The search looks in the name and the description of the published products; a product that is not published is not listed.',
+  });
+});
+
+/**
+ * Assert the shop grid lists, or does not list, a product by its name
+ * (`#products_grid .o_wsale_products_item_title`).
+ *
+ * Example #1: Then I should see the "Customizable Desk" product in the shop
+ * Example #2: And I should see the "Office Chair" product in the Odoo shop
+ * Example #3: Then we should see the "Large Cabinet" product in the shop
+ * Example #4: And I should not see the "Office Lamp" product in the shop
+ * Example #5: Then we should not see the "Warranty" product in the Odoo shop
+ *
+ */
+Then(/^(I |we )*should( not)* see the "([^"]*)" product in the (?:Odoo )?shop$/, async function (pronounCase, notCase, name) {
+  await assertPresence(this.page.locator('#products_grid'), undefined, 'the shop product grid ("#products_grid")', {
+    attached: true,
+    hint: 'Open the shop page first.',
+  });
+  const titles = this.page.locator('#products_grid .o_wsale_products_item_title');
+  await assertPresence(titles.filter({ hasText: textPattern(name, { exact: true }) }).first(), notCase, `the "${name}" product in the shop grid`, {
+    timeout: SHORT_TIMEOUT,
+    hint: `The grid lists ${await listTexts(titles)}. The shop shows its products by pages and only the published ones.`,
+  });
 });
 
 /**
@@ -419,8 +456,31 @@ Then(/^(I |we )*should( not)* see (?:Odoo )?job (?:openings|listings|postings)$/
 // Contact form
 // ---------------------------------------------------------------------------
 
+const CONTACT_FORM = '#contactus_form, #wrap form.s_website_form, #wrap .s_website_form form';
+
 /**
- * Navigate to the core "Contact us" page at `/contactus`.
+ * The contact form of the page, required and visible.
+ *
+ * @param {object} world
+ * @returns {Promise<import('playwright').Locator>}
+ */
+async function requireContactForm(world) {
+  const form = world.page.locator(CONTACT_FORM).first();
+  try {
+    await form.waitFor({ state: 'visible', timeout: SHORT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      message: 'Expected the contact form on the page.',
+      cause: `the page is ${world.page.url()}`,
+      hint: 'Open the contact page first ("Given I am on the contact us page"). The form is the "Form" building block of the Website builder.',
+    });
+  }
+  return form;
+}
+
+/**
+ * Navigate to the "Contact us" page at `/contactus` and check that the site
+ * serves it: the Website layout is there and the page is not the 404 page.
  *
  * Example #1: Given I am on the Odoo contact us page
  * Example #2: Given we are on the contact page
@@ -431,12 +491,21 @@ Then(/^(I |we )*should( not)* see (?:Odoo )?job (?:openings|listings|postings)$/
  */
 Given(/^(I am |we are )*on the (?:Odoo )?(?:"contact us"|contact[ -]?us|contact) page$/, async function (pronounCase) {
   await navigate(this, '/contactus');
+  const page = this.page;
+  const notFound = await page.locator('main h1', { hasText: '404' }).count();
+  if (notFound || !(await page.locator('#wrapwrap').count())) {
+    throw friendly({
+      message: 'Expected the contact page at /contactus.',
+      cause: notFound ? 'the site answers with its 404 page' : `the page at ${page.url()} is not a Website page`,
+      hint: 'The page ships with the Website app; a site that unpublished or moved it needs "Given I am on "<its path>"" instead.',
+    });
+  }
 });
 
 /**
  * Assert the "Contact us" form is, or is not, visible. Matches
- * `#contactus_form`, the `s_website_form` snippet instance the Website app
- * renders on the default contact-us page.
+ * `#contactus_form`, the form the Website app renders on the contact page,
+ * or another "Form" building block in the content of the page.
  *
  * Example #1: Then I should see the Odoo contact us form
  * Example #2: And I should see the contact form
@@ -446,9 +515,319 @@ Given(/^(I am |we are )*on the (?:Odoo )?(?:"contact us"|contact[ -]?us|contact)
  *
  */
 Then(/^(I |we )*should( not)* see the (?:Odoo )?(?:"contact us"|contact[ -]?us|contact) form$/, async function (pronounCase, notCase) {
-  await assertPresence(this.page.locator('#contactus_form'), notCase, 'the contact-us form ("#contactus_form")', {
-    hint: 'The default /contactus page renders the form snippet with this id; a redesigned page may have dropped or renamed it.',
+  await assertPresence(this.page.locator(CONTACT_FORM).first(), notCase, 'the contact form ("#contactus_form")', {
+    hint: 'The contact page renders the form with this id; a redesigned page may have dropped or renamed it.',
   });
+  if (notCase) return;
+  await assertPresence(this.page.locator(CONTACT_FORM).first().locator('.s_website_form_send').first(), undefined, 'the submit button of the contact form (".s_website_form_send")', {
+    timeout: SHORT_TIMEOUT,
+    hint: 'The button is part of the "Form" building block.',
+  });
+});
+
+/**
+ * Fill the contact form from a table: the first column names a field by its
+ * label ("Name", "Email", "Question"), the second gives the value.
+ *
+ * Example #1: When I fill in the contact form with:
+ * Example #2: When we fill in the contact form with:
+ * Example #3: And I fill in the Odoo contact form with:
+ * Example #4: When I fill in the contact us form with:
+ * Example #5: And we fill in the Odoo contact us form with:
+ *
+ */
+When(/^(I |we )*fill in the (?:Odoo )?contact(?: us)? form with:$/, async function (pronounCase, dataTable) {
+  const form = await requireContactForm(this);
+  const labels = form.locator('label.s_website_form_label:visible');
+  for (const [name, value] of dataTable.raw()) {
+    // The label reads "Name *": the mark of a required field is not part of
+    // the name.
+    const label = labels.filter({ has: this.page.locator('.s_website_form_label_content', { hasText: textPattern(name, { exact: true }) }) }).first();
+    if (!(await label.isVisible().catch(() => false))) {
+      throw friendly({
+        message: `Expected a "${name}" field in the contact form.`,
+        cause: `the form shows the fields ${await listTexts(labels.locator('.s_website_form_label_content'))}`,
+        hint: 'The name is matched by the whole text of the label, case-sensitive.',
+      });
+    }
+    const target = await label.getAttribute('for');
+    const input = form.locator(`[id="${target}"]`).first();
+    const tag = await input.evaluate((element) => element.tagName.toLowerCase());
+    if (tag === 'select') await input.selectOption({ label: value });
+    else await input.fill(value);
+  }
+});
+
+/**
+ * Submit the contact form with its button (`.s_website_form_send`) and wait
+ * for the answer of the site: the confirmation, or the errors the form
+ * shows. Assert the outcome in the step that follows.
+ *
+ * Example #1: When I submit the contact form
+ * Example #2: When we submit the contact form
+ * Example #3: And I submit the Odoo contact form
+ * Example #4: When I send the contact form
+ * Example #5: And we send the Odoo contact us form
+ *
+ */
+When(/^(I |we )*(?:submit|send) the (?:Odoo )?contact(?: us)? form$/, async function (pronounCase) {
+  const page = this.page;
+  const form = await requireContactForm(this);
+  const startUrl = page.url();
+  await form.locator('.s_website_form_send').first().click();
+  // The form answers in one of three ways: it redirects to its confirmation
+  // page, it shows its confirmation message in place, or it marks the fields
+  // it refuses.
+  await page.waitForFunction((url) => window.location.href !== url
+    || document.querySelector('.s_website_form_end_message:not(.d-none)')
+    || document.querySelector('.s_website_form_field.o_has_error, #s_website_form_result .text-danger, #s_website_form_result.text-danger'),
+  startUrl, { timeout: WAIT_TIMEOUT }).catch(() => {});
+  await waitForPageLoad(page, budget(this));
+});
+
+/**
+ * Assert the site confirmed, or did not confirm, the contact form: the
+ * visitor is on the confirmation page (`/contactus-thank-you`) or the form
+ * shows its confirmation message in place (`.s_website_form_end_message`).
+ *
+ * Example #1: Then I should see the contact form confirmation
+ * Example #2: And I should see the Odoo contact form confirmation
+ * Example #3: Then we should see the contact us form confirmation
+ * Example #4: And I should not see the contact form confirmation
+ * Example #5: Then we should not see the Odoo contact form confirmation
+ *
+ */
+Then(/^(I |we )*should( not)* see the (?:Odoo )?contact(?: us)? form confirmation$/, async function (pronounCase, notCase) {
+  const page = this.page;
+  const confirmed = async () => /\/contactus-thank-you(\b|$)/.test(page.url())
+    || (await page.locator('.s_website_form_end_message:visible').count()) > 0;
+  const deadline = Date.now() + SHORT_TIMEOUT;
+  let state = await confirmed();
+  while (state === Boolean(notCase) && !notCase && Date.now() < deadline) {
+    await waitForPageLoad(page, 500);
+    state = await confirmed();
+  }
+  if (state === Boolean(notCase)) {
+    const errors = await listTexts(page.locator('.s_website_form_field.o_has_error .s_website_form_label_content'));
+    throw friendly({
+      message: notCase ? 'Expected no confirmation of the contact form.' : 'Expected the confirmation of the contact form.',
+      cause: notCase ? `the page is ${page.url()}` : `the page is ${page.url()} and the form marks these fields as invalid: ${errors}`,
+      hint: 'The form confirms by redirecting to its "thank you" page or by showing a message in place; required fields are marked with "*".',
+    });
+  }
+});
+
+/**
+ * Assert the contact form shows, or does not show, an error after it was
+ * submitted: the fields it refuses are marked (`.o_has_error`) and a message
+ * appears next to the button. An optional field name checks that this field
+ * is one of the refused ones.
+ *
+ * Example #1: Then I should see a contact form error
+ * Example #2: And I should not see a contact form error
+ * Example #3: Then we should see an Odoo contact form error
+ * Example #4: And I should see a contact form error on "Email"
+ * Example #5: Then we should see a contact us form error on "Question"
+ *
+ */
+Then(/^(I |we )*should( not)* see an? (?:Odoo )?contact(?: us)? form error(?: on "([^"]*)")?$/, async function (pronounCase, notCase, field) {
+  const form = await requireContactForm(this);
+  const refused = form.locator('.s_website_form_field.o_has_error');
+  const target = field
+    ? refused.filter({ has: this.page.locator('.s_website_form_label_content', { hasText: textPattern(field, { exact: true }) }) }).first()
+    : refused.first();
+  await assertPresence(target, notCase, field ? `an error on the "${field}" field of the contact form` : 'an error on the contact form (".o_has_error")', {
+    timeout: SHORT_TIMEOUT,
+    hint: `The form marks these fields as invalid: ${await listTexts(refused.locator('.s_website_form_label_content'))}. Submit the form first ("When I submit the contact form").`,
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Website editor
+// ---------------------------------------------------------------------------
+
+const EDITOR_PANEL = '#oe_snippets.o_loaded';
+
+/**
+ * Open a page in the website preview of the web client (`/@/<path>`), where
+ * a website editor finds the "Edit" button.
+ *
+ * @param {object} world
+ * @param {string} path
+ * @returns {Promise<void>}
+ */
+async function openWebsitePreview(world, path) {
+  const page = world.page;
+  const target = `/@/${String(path || '/').replace(/^\/+/, '')}`;
+  await navigate(world, target);
+  try {
+    await page.locator('.o_website_preview iframe.o_iframe').first().waitFor({ state: 'visible', timeout: WAIT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      message: 'Expected the website preview of the web client.',
+      cause: `the page is ${page.url()}`,
+      hint: 'The preview is shown to an internal user; log in first ("Given I am a logged in user with the "admin" user").',
+    });
+  }
+  await settle(world);
+}
+
+/**
+ * Assert the current user can, or cannot, edit the website: the website
+ * preview of the web client shows the "Edit" button
+ * (`.o_edit_website_container`) to the users of the "Restricted Editor" and
+ * "Editor and Designer" groups. With `on "<path>"` the check runs on that
+ * page; the front page otherwise.
+ *
+ * Example #1: Then I should be able to edit the website
+ * Example #2: And I should not be able to edit the website
+ * Example #3: Then we should be able to edit the Odoo website
+ * Example #4: And I should be able to edit the website on "/contactus"
+ * Example #5: Then we should not be able to edit the Odoo website on "/shop"
+ *
+ */
+Then(/^(I |we )*should( not)* be able to edit the (?:Odoo )?website(?: on "([^"]*)")?$/, async function (pronounCase, notCase, path) {
+  await openWebsitePreview(this, path || '/');
+  await assertPresence(this.page.locator('.o_menu_systray .o_edit_website_container a').first(), notCase, 'the "Edit" button of the website preview (".o_edit_website_container")', {
+    timeout: SHORT_TIMEOUT,
+    hint: 'The button is shown to the users of the website editor groups (Website: Restricted Editor, Editor and Designer).',
+  });
+});
+
+/**
+ * Open the website editor on a page: the page is shown in the website
+ * preview of the web client, the "Edit" button is clicked and the step waits
+ * for the editor panel with its building blocks (`#oe_snippets`). With `on
+ * "<path>"` the editor opens on that page; on the front page otherwise.
+ *
+ * Example #1: When I open the website editor
+ * Example #2: When we open the website editor
+ * Example #3: And I open the Odoo website editor
+ * Example #4: When I open the website editor on "/contactus"
+ * Example #5: And we open the Odoo website editor on "/shop"
+ *
+ */
+When(/^(I |we )*open the (?:Odoo )?website editor(?: on "([^"]*)")?$/, async function (pronounCase, path) {
+  const page = this.page;
+  await openWebsitePreview(this, path || '/');
+  const edit = page.locator('.o_menu_systray .o_edit_website_container a').first();
+  try {
+    await edit.click({ timeout: SHORT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      action: 'click the "Edit" button of the website preview',
+      target: '.o_edit_website_container',
+      cause: error,
+      hint: 'The button is shown to the users of the website editor groups (Website: Restricted Editor, Editor and Designer).',
+    });
+  }
+  try {
+    await page.locator(EDITOR_PANEL).first().waitFor({ state: 'visible', timeout: WAIT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      message: 'Expected the website editor to open.',
+      cause: error,
+      hint: 'The editor loads its building blocks before it is ready; an error dialog on screen names what went wrong.',
+    });
+  }
+  await settle(this);
+});
+
+/**
+ * Assert the website editor is, or is not, open: its panel with the
+ * building blocks and the "Save" and "Discard" buttons (`#oe_snippets`).
+ *
+ * Example #1: Then I should see the website editor
+ * Example #2: And I should not see the website editor
+ * Example #3: Then we should see the Odoo website editor
+ * Example #4: And I should see the editor of the website
+ * Example #5: Then we should not see the editor of the Odoo website
+ *
+ */
+Then(/^(I |we )*should( not)* see the (?:(?:Odoo )?website editor|editor of the (?:Odoo )?website)$/, async function (pronounCase, notCase) {
+  await assertPresence(this.page.locator(EDITOR_PANEL).first(), notCase, 'the website editor ("#oe_snippets")', {
+    timeout: SHORT_TIMEOUT,
+    hint: 'Open the editor first ("When I open the website editor"); saving or discarding closes it.',
+  });
+  if (notCase) return;
+  await assertPresence(this.page.locator('.o_we_website_top_actions button[data-action="save"]').first(), undefined, 'the "Save" button of the website editor', {
+    timeout: SHORT_TIMEOUT,
+    hint: 'The button sits at the top of the editor panel.',
+  });
+});
+
+/**
+ * Assert the website editor offers, or does not offer, a building block, by
+ * its name in the "Blocks" tab of the editor panel (`#oe_snippets
+ * .oe_snippet`).
+ *
+ * Example #1: Then I should see the "Text" building block
+ * Example #2: And I should see the "Banner" building block
+ * Example #3: Then we should see the "Text - Image" Odoo building block
+ * Example #4: And I should not see the "No Such Block" building block
+ * Example #5: Then we should not see the "Countdown" website building block
+ *
+ */
+Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo |website )?building block$/, async function (pronounCase, notCase, name) {
+  const page = this.page;
+  await assertPresence(page.locator(EDITOR_PANEL).first(), undefined, 'the website editor ("#oe_snippets")', {
+    timeout: SHORT_TIMEOUT,
+    hint: 'Open the editor first ("When I open the website editor").',
+  });
+  const blocks = page.locator('#oe_snippets .oe_snippet[name]');
+  const names = await blocks.evaluateAll((elements) => [...new Set(elements.map((element) => element.getAttribute('name')).filter(Boolean))]);
+  const offered = names.includes(name);
+  if (offered === Boolean(notCase)) {
+    throw friendly({
+      message: notCase ? `Expected no "${name}" building block in the website editor.` : `Expected a "${name}" building block in the website editor.`,
+      cause: `the editor offers ${names.slice(0, 40).map((block) => `"${block}"`).join(', ') || '(none)'}`,
+      hint: 'A building block is named as in the "Blocks" tab of the editor; the installed apps and the theme add their own.',
+    });
+  }
+});
+
+/**
+ * Leave the website editor with its "Save" or its "Discard" button and wait
+ * for the editor to close. Discarding changes asks for a confirmation, which
+ * the step gives.
+ *
+ * Example #1: When I save the website editor
+ * Example #2: When we discard the website editor
+ * Example #3: And I save the Odoo website editor
+ * Example #4: When I discard the Odoo website editor
+ * Example #5: And we save the website editor
+ *
+ */
+When(/^(I |we )*(save|discard) the (?:Odoo )?website editor$/, async function (pronounCase, action) {
+  const page = this.page;
+  const button = page.locator(`.o_we_website_top_actions button[data-action="${action === 'save' ? 'save' : 'cancel'}"]`).first();
+  try {
+    await button.click({ timeout: SHORT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      action: `click the "${action === 'save' ? 'Save' : 'Discard'}" button of the website editor`,
+      target: '.o_we_website_top_actions',
+      cause: error,
+      hint: 'Open the editor first ("When I open the website editor").',
+    });
+  }
+  // Discarding real changes opens a confirmation.
+  const confirm = page.locator('.modal[role="dialog"]:visible .modal-footer .btn-primary').first();
+  await Promise.race([
+    page.locator(EDITOR_PANEL).first().waitFor({ state: 'hidden', timeout: WAIT_TIMEOUT }),
+    confirm.waitFor({ state: 'visible', timeout: WAIT_TIMEOUT }),
+  ]).catch(() => {});
+  if (await confirm.isVisible().catch(() => false)) await confirm.click();
+  try {
+    await page.locator(EDITOR_PANEL).first().waitFor({ state: 'hidden', timeout: WAIT_TIMEOUT });
+  } catch (error) {
+    throw friendly({
+      message: 'Expected the website editor to close.',
+      cause: error,
+      hint: 'A dialog on screen names what kept the editor open.',
+    });
+  }
+  await settle(this);
 });
 
 // ---------------------------------------------------------------------------

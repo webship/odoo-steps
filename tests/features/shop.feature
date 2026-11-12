@@ -10,8 +10,15 @@ Feature: Odoo shop
 
   Scenario: Shop search returns matching results
     Given I am on "/shop"
-    When I search the Odoo shop for "mug"
-    Then I should see Odoo shop search results for "mug"
+    When I search the Odoo shop for "desk"
+    Then I should see Odoo shop search results for "desk"
+    And I should see the "Customizable Desk" product in the shop
+    And I should not see the "Office Chair" product in the shop
+
+  Scenario: Shop search with no match lists no product
+    Given I am on "/shop"
+    When I search the shop for "no-such-product"
+    Then I should not see shop search results for "no-such-product"
 
   Scenario: A product page renders the product template
     Given I am on "/shop"
