@@ -40,7 +40,9 @@ function cucumberExpressionToRegex(expression) {
 
 function extractDefinitions(source, file) {
   const definitions = [];
-  const re = /(?:^|\n)[ \t]*(Given|When|Then|defineStep)\(\s*(?:\/((?:\\\/|[^/\n])+)\/([a-z]*)|'((?:\\'|[^'\n])*)'|"((?:\\"|[^"\n])*)"|`([^`\n]*)`)/g;
+  // webship-js registers some of its steps through aliases (ThenF, WhenF):
+  // they count as well, or an ambiguity with one of them goes unseen.
+  const re = /(?:^|\n)[ \t]*(Given|When|Then|defineStep)F?\(\s*(?:\/((?:\\\/|[^/\n])+)\/([a-z]*)|'((?:\\'|[^'\n])*)'|"((?:\\"|[^"\n])*)"|`([^`\n]*)`)/g;
   let m;
   while ((m = re.exec(source))) {
     const index = m.index + (m[0].startsWith('\n') ? 1 : 0);
