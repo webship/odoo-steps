@@ -5,17 +5,17 @@ Feature: Odoo blog
 
   Scenario: Blog index renders the post list
     Given I am on "/blog"
-     Then I should be on the Odoo blog index
+     Then I should be on the blog index
       And the response status code should be 200
 
   Scenario: A blog post renders the single-post template
     Given I am on "/blog"
      When I click on the element ".o_wblog_post a"
-     Then I should be on an Odoo blog post page
+     Then I should be on an blog post page
      And the response status code should be 200
 
   Scenario: A blog post shows its title
     Given I am on "/blog/travel-1/sierra-tarahumara-1"
-     Then I should be on an Odoo blog post page
+     Then I should be on an blog post page
       And I should see the blog post titled "Sierra Tarahumara"
       And I should not see the blog post titled "An exciting mix"

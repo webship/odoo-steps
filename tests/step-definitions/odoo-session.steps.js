@@ -68,14 +68,14 @@ async function openUserMenu(world) {
  * Navigate to the login screen at `/web/login`. The screen ships with the
  * base "web" module, so every Odoo site has it.
  *
- * Example #1: Given I am on the Odoo login page
+ * Example #1: Given I am on the login page
  * Example #2: Given we are on the login page
  * Example #3: Given I am on the sign in page
- * Example #4: And on the Odoo sign-in page
+ * Example #4: And on the sign-in page
  * Example #5: Given I am on the web/login page
  *
  */
-Given(/^(I am |we are )*on the (?:Odoo )?(?:sign[- ]?in|web\/login|login) page$/, async function (pronounCase) {
+Given(/^(I am |we are )*on the (?:sign[- ]?in|web\/login|login) page$/, async function (pronounCase) {
   await navigate(this, loginPath(this));
   const page = this.page;
   if (/\/web\/database\/selector/.test(page.url())) {
@@ -95,14 +95,14 @@ Given(/^(I am |we are )*on the (?:Odoo )?(?:sign[- ]?in|web\/login|login) page$/
  * button. Each part is checked separately so a failure names the missing
  * one.
  *
- * Example #1: Then I should see the Odoo login form
+ * Example #1: Then I should see the login form
  * Example #2: And I should see the sign in form
  * Example #3: Then we should see the login form
  * Example #4: And should not see the login form
- * Example #5: Then I should see the Odoo sign-in form
+ * Example #5: Then I should see the sign-in form
  *
  */
-Then(/^(I |we )*should( not)* see the (?:Odoo )?(?:sign[- ]?in|login) form$/, async function (pronounCase, notCase) {
+Then(/^(I |we )*should( not)* see the (?:sign[- ]?in|login) form$/, async function (pronounCase, notCase) {
   const hint = 'The login screen is /web/login; a logged-in visitor is redirected away from it to /web.';
   await assertPresence(this.page.locator(LOGIN_FORM), notCase, 'the login form ("form[action=\\"/web/login\\"]")', { hint });
   if (notCase) return;
@@ -118,14 +118,14 @@ Then(/^(I |we )*should( not)* see the (?:Odoo )?(?:sign[- ]?in|login) form$/, as
  * else use the users registry: `Given I am a logged in user with the "admin"
  * user`.
  *
- * Example #1: When I log in to Odoo as "admin" with password "secret"
+ * Example #1: When I log in as "admin" with password "secret"
  * Example #2: When we log in as "demo@example.com" with password "p@ssw0rd"
- * Example #3: And I sign in to Odoo as "admin" with password "secret"
+ * Example #3: And I sign in as "admin" with password "secret"
  * Example #4: When we sign-in as "reviewer" with password "hunter2"
  * Example #5: And log in as "portal_user" with password "letmein"
  *
  */
-When(/^(I |we )*(?:log in|sign[- ]?in)(?: to Odoo)? as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
+When(/^(I |we )*(?:log in|sign[- ]?in) as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
   await submitLogin(this, username, password);
   await this.page.locator(`.o_main_navbar, #wrapwrap, ${LOGIN_FORM}`).first().waitFor({ state: 'attached', timeout: WAIT_TIMEOUT }).catch(() => {});
   await settle(this, budget(this));
@@ -159,9 +159,9 @@ Given(/^(I am |we are )*a logged in user with( the)*( username)* "([^"]*)?"( use
  *
  * Example #1: Given I am not logged in
  * Example #2: Given we are not logged in
- * Example #3: And I am not logged in
+ * Example #3: And we are not logged in
  * Example #4: Given not logged in
- * Example #5: But I am not logged in
+ * Example #5: But not logged in
  *
  */
 Given(/^(I am |we are )*not logged in$/, async function (pronounCase) {
@@ -184,14 +184,14 @@ Given(/^(I am |we are )*not logged in$/, async function (pronounCase) {
  * text. Matches the `.alert-danger` message the login form renders after a
  * wrong login or password ("Wrong login/password").
  *
- * Example #1: Then I should see an Odoo login error
+ * Example #1: Then I should see an login error
  * Example #2: And I should see a sign in error
  * Example #3: Then we should see a login error "Wrong login/password"
  * Example #4: And should not see a login error
  * Example #5: Then I should see an authentication error message
  *
  */
-Then(/^(I |we )*should( not)* see an? (?:Odoo )?(?:login|sign[- ]?in|authentication) error(?: message)?(?: "([^"]*)")?$/, async function (pronounCase, notCase, expectedText) {
+Then(/^(I |we )*should( not)* see an? (?:login|sign[- ]?in|authentication) error(?: message)?(?: "([^"]*)")?$/, async function (pronounCase, notCase, expectedText) {
   const error = this.page.locator(`${LOGIN_FORM} .alert-danger`).first();
   const hint = 'The login screen renders the message inside the form after a wrong login or password.';
   if (notCase && !expectedText) {
@@ -211,12 +211,12 @@ Then(/^(I |we )*should( not)* see an? (?:Odoo )?(?:login|sign[- ]?in|authenticat
  *
  * Example #1: When I log out
  * Example #2: When we log out
- * Example #3: And I log out of Odoo
+ * Example #3: And log out
  * Example #4: When I sign out
- * Example #5: And we sign out of Odoo
+ * Example #5: And we sign out
  *
  */
-When(/^(I |we )*(?:log|sign) out(?: of Odoo)?$/, async function (pronounCase) {
+When(/^(I |we )*(?:log|sign) out$/, async function (pronounCase) {
   const page = this.page;
   const menu = await openUserMenu(this);
   const entry = menu.locator('[data-menu="logout"], #o_logout, a[href*="/web/session/logout"]').first();
@@ -253,11 +253,11 @@ When(/^(I |we )*(?:log|sign) out(?: of Odoo)?$/, async function (pronounCase) {
  * Example #1: Then I should be logged in
  * Example #2: And we should be logged in
  * Example #3: Then I should not be logged in
- * Example #4: And I should be logged in to Odoo
- * Example #5: Then we should not be logged in to Odoo
+ * Example #4: And should be logged in
+ * Example #5: Then we should not be logged in
  *
  */
-Then(/^(I |we )*should( not)* be logged in(?: to Odoo)?$/, async function (pronounCase, notCase) {
+Then(/^(I |we )*should( not)* be logged in$/, async function (pronounCase, notCase) {
   const session = await sessionInfo(this);
   if (notCase && session.uid) {
     throw friendly({
@@ -285,10 +285,10 @@ Then(/^(I |we )*should( not)* be logged in(?: to Odoo)?$/, async function (prono
  * Example #2: And I should be logged in as "Mitchell Admin"
  * Example #3: Then we should be logged in as "salesperson"
  * Example #4: And I should not be logged in as "admin"
- * Example #5: Then I should be logged in to Odoo as "portal"
+ * Example #5: Then I should be logged in as "portal"
  *
  */
-Then(/^(I |we )*should( not)* be logged in(?: to Odoo)? as "([^"]*)"$/, async function (pronounCase, notCase, expected) {
+Then(/^(I |we )*should( not)* be logged in as "([^"]*)"$/, async function (pronounCase, notCase, expected) {
   const session = await sessionInfo(this);
   const matches = Boolean(session.uid) && (session.username === expected || session.name === expected);
   if (Boolean(notCase) === matches) {
@@ -306,13 +306,13 @@ Then(/^(I |we )*should( not)* be logged in(?: to Odoo)? as "([^"]*)"$/, async fu
  * `.o_main_navbar`), as opposed to the website and the portal.
  *
  * Example #1: Then I should be in the web client
- * Example #2: And I should be in the Odoo web client
+ * Example #2: And we should be in the web client
  * Example #3: Then we should be in the backend
  * Example #4: And I should not be in the web client
- * Example #5: Then I should not be in the Odoo backend
+ * Example #5: Then I should not be in the backend
  *
  */
-Then(/^(I |we )*should( not)* be in the (?:Odoo )?(?:web client|backend)$/, async function (pronounCase, notCase) {
+Then(/^(I |we )*should( not)* be in the (?:web client|backend)$/, async function (pronounCase, notCase) {
   await assertPresence(this.page.locator('body.o_web_client .o_main_navbar').first(), notCase, 'the web client (".o_web_client .o_main_navbar")', {
     hint: 'Internal users land on the web client at /web after logging in; portal users are sent to /my and visitors to the login screen.',
   });
@@ -324,13 +324,13 @@ Then(/^(I |we )*should( not)* be in the (?:Odoo )?(?:web client|backend)$/, asyn
  * user lands on (`/my`, rendered inside `#wrap.o_portal_wrap`).
  *
  * Example #1: Then I should be in the portal
- * Example #2: And I should be in the Odoo portal
+ * Example #2: And we should be in the portal
  * Example #3: Then we should be in the customer portal
  * Example #4: And I should not be in the portal
- * Example #5: Then I should not be in the Odoo customer portal
+ * Example #5: Then I should not be in the customer portal
  *
  */
-Then(/^(I |we )*should( not)* be in the (?:Odoo )?(?:customer )?portal$/, async function (pronounCase, notCase) {
+Then(/^(I |we )*should( not)* be in the (?:customer )?portal$/, async function (pronounCase, notCase) {
   await assertPresence(this.page.locator('.o_portal_wrap').first(), notCase, 'the portal ("#wrap.o_portal_wrap")', {
     attached: true,
     hint: 'A portal user lands on /my after logging in; an internal user lands on the web client.',
@@ -343,12 +343,12 @@ Then(/^(I |we )*should( not)* be in the (?:Odoo )?(?:customer )?portal$/, async 
  *
  * Example #1: When I open the user menu
  * Example #2: When we open the user menu
- * Example #3: And I open the Odoo user menu
+ * Example #3: And open the user menu
  * Example #4: When I open the account menu
- * Example #5: And we open the Odoo account menu
+ * Example #5: And we open the account menu
  *
  */
-When(/^(I |we )*open the (?:Odoo )?(?:user|account) menu$/, async function (pronounCase) {
+When(/^(I |we )*open the (?:user|account) menu$/, async function (pronounCase) {
   await openUserMenu(this);
 });
 
@@ -358,12 +358,12 @@ When(/^(I |we )*open the (?:Odoo )?(?:user|account) menu$/, async function (pron
  *
  * Example #1: Then I should see "My Profile" in the user menu
  * Example #2: And I should see "Log out" in the user menu
- * Example #3: Then we should see "My Account" in the Odoo user menu
+ * Example #3: Then we should see "My Account" in the user menu
  * Example #4: And I should not see "Settings" in the user menu
  * Example #5: Then I should not see "Documentation" in the account menu
  *
  */
-Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?(?:user|account) menu$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:user|account) menu$/, async function (pronounCase, notCase, text) {
   const menu = await openUserMenu(this);
   const entry = menu.locator('.dropdown-item').filter({ hasText: textPattern(text, { exact: true }) }).first();
   const offered = await listTexts(menu.locator('.dropdown-item'));
@@ -379,12 +379,12 @@ Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?(?:user|account) me
  *
  * Example #1: When I choose "My Profile" in the user menu
  * Example #2: When we choose "My Account" in the user menu
- * Example #3: And I choose "Shortcuts" in the Odoo user menu
+ * Example #3: And I choose "Shortcuts" in the user menu
  * Example #4: When I choose "My Profile" in the account menu
- * Example #5: And we choose "Log out" in the Odoo account menu
+ * Example #5: And we choose "Log out" in the account menu
  *
  */
-When(/^(I |we )*choose "([^"]*)" in the (?:Odoo )?(?:user|account) menu$/, async function (pronounCase, text) {
+When(/^(I |we )*choose "([^"]*)" in the (?:user|account) menu$/, async function (pronounCase, text) {
   const menu = await openUserMenu(this);
   const entry = menu.locator('.dropdown-item').filter({ hasText: textPattern(text, { exact: true }) }).first();
   try {

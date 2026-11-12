@@ -7,10 +7,10 @@ Feature: Odoo homepage
   Scenario: Homepage renders the Odoo Website layout
     Given I am an anonymous user
     And I am on the homepage
-    Then I should be on an Odoo website page
+    Then I should be on a website page
     And the response status code should be 200
 
   Scenario: Homepage shows the core Odoo layout
     Given I am on the homepage
-    Then I should see the Odoo top menu
-    And I should see the Odoo footer
+    Then I should see the top menu
+    And I should see the footer

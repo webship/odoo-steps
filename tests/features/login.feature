@@ -4,8 +4,8 @@ Feature: Odoo login
   So that I know authentication is available on this site
 
   Scenario: The login screen exposes login, password and submit
-    Given I am on the Odoo login page
-     Then I should see the Odoo login form
+    Given I am on the login page
+     Then I should see the login form
       And the response status code should be 200
 
   @critical
@@ -14,9 +14,9 @@ Feature: Odoo login
      Then the path should be "/web"
 
   Scenario: An invalid login shows an authentication error
-    Given I am on the Odoo login page
-     When I log in to Odoo as "not-a-real-user@example.com" with password "wrong-password"
-     Then I should see an Odoo login error
+    Given I am on the login page
+     When I log in as "not-a-real-user@example.com" with password "wrong-password"
+     Then I should see an login error
 
   # Credentials come from worldParameters.users in cucumber.js (overridable
   # with ODOO_ADMIN_USER / ODOO_ADMIN_PASSWORD), so no password appears here.
@@ -24,4 +24,4 @@ Feature: Odoo login
     Given I am a logged in user with the "admin" user
     Then the path should not be "/web/login"
     When I am not logged in
-    Then I should see the Odoo login form
+    Then I should see the login form

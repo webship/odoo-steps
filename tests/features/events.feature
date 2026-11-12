@@ -5,5 +5,5 @@ Feature: Odoo events
 
   Scenario: Events index renders the events list
     Given I am on "/event"
-    Then I should be on the Odoo events page
+    Then I should be on the events page
     And the response status code should be 200

@@ -5,13 +5,13 @@ Feature: Odoo shop
 
   Scenario: Shop index renders the product grid
     Given I am on "/shop"
-    Then I should be on the Odoo shop index
+    Then I should be on the shop index
     And the response status code should be 200
 
   Scenario: Shop search returns matching results
     Given I am on "/shop"
-    When I search the Odoo shop for "desk"
-    Then I should see Odoo shop search results for "desk"
+    When I search the shop for "desk"
+    Then I should see shop search results for "desk"
     And I should see the "Customizable Desk" product in the shop
     And I should not see the "Office Chair" product in the shop
 
@@ -23,11 +23,11 @@ Feature: Odoo shop
   Scenario: A product page renders the product template
     Given I am on "/shop"
     When I open the first product in the shop
-    Then I should be on an Odoo product page
+    Then I should be on an product page
     And the response status code should be 200
 
   Scenario: Adding a product updates the cart badge
     Given I am on "/shop"
     When I open the first product in the shop
-    And I add the product to the Odoo cart
-    Then I should see "1" item in the Odoo cart
+    And I add the product to the cart
+    Then I should see "1" item in the cart
