@@ -13,3 +13,9 @@ Feature: Odoo blog
      When I click on the element ".o_wblog_post a"
      Then I should be on an Odoo blog post page
      And the response status code should be 200
+
+  Scenario: A blog post shows its title
+    Given I am on "/blog/travel-1/sierra-tarahumara-1"
+     Then I should be on an Odoo blog post page
+      And I should see the blog post titled "Sierra Tarahumara"
+      And I should not see the blog post titled "An exciting mix"

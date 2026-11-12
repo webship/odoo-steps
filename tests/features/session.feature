@@ -36,6 +36,13 @@ Feature: Odoo sessions
     When I choose "My Profile" in the user menu
     Then I should see "Change My Preferences"
 
+  Scenario: The user menu opens and lists its entries
+    Given I am a logged in user with the "accountant" user
+    When I open the user menu
+    Then I should see "Log out"
+    And I should see "My Profile" in the user menu
+    And I should not see "No Such Entry" in the user menu
+
   Scenario: A visitor holds no session
     Given I am not logged in
     Then I should not be logged in
