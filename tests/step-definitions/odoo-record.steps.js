@@ -402,12 +402,12 @@ async function findButton(world, text) {
  *
  * Example #1: When I create a new record
  * Example #2: When we create a new record
- * Example #3: And I create a new Odoo record
+ * Example #3: And start a new record
  * Example #4: When I start a new record
- * Example #5: And we start a new Odoo record
+ * Example #5: And we start a new record
  *
  */
-When(/^(I |we )*(?:create|start) a new (?:Odoo )?record$/, async function (pronounCase) {
+When(/^(I |we )*(?:create|start) a new record$/, async function (pronounCase) {
   const page = this.page;
   await settle(this);
   const scope = await activeScope(page);
@@ -487,12 +487,12 @@ async function saveForm(world, strict) {
  *
  * Example #1: When I save the record
  * Example #2: When we save the record
- * Example #3: And I save the Odoo record
+ * Example #3: And save the form
  * Example #4: When I save the form
- * Example #5: And we save the Odoo form
+ * Example #5: And we save the form
  *
  */
-When(/^(I |we )*save the (?:Odoo )?(?:record|form)$/, async function (pronounCase) {
+When(/^(I |we )*save the (?:record|form)$/, async function (pronounCase) {
   await saveForm(this, true);
 });
 
@@ -504,12 +504,12 @@ When(/^(I |we )*save the (?:Odoo )?(?:record|form)$/, async function (pronounCas
  *
  * Example #1: When I try to save the record
  * Example #2: When we try to save the record
- * Example #3: And I try to save the Odoo record
+ * Example #3: And try to save the record
  * Example #4: When I try to save the form
- * Example #5: And we try to save the Odoo form
+ * Example #5: And we try to save the form
  *
  */
-When(/^(I |we )*try to save the (?:Odoo )?(?:record|form)$/, async function (pronounCase) {
+When(/^(I |we )*try to save the (?:record|form)$/, async function (pronounCase) {
   await saveForm(this, false);
 });
 
@@ -521,11 +521,11 @@ When(/^(I |we )*try to save the (?:Odoo )?(?:record|form)$/, async function (pro
  * Example #1: When I discard the changes
  * Example #2: When we discard the changes
  * Example #3: And I discard the record
- * Example #4: When I discard the Odoo record
+ * Example #4: When we discard the record
  * Example #5: And we discard the changes of the record
  *
  */
-When(/^(I |we )*discard the (?:(?:Odoo )?record|changes(?: of the (?:Odoo )?record)?)$/, async function (pronounCase) {
+When(/^(I |we )*discard the (?:record|changes(?: of the record)?)$/, async function (pronounCase) {
   const page = this.page;
   await activeForm(this);
   const scope = await activeScope(page);
@@ -551,11 +551,11 @@ When(/^(I |we )*discard the (?:(?:Odoo )?record|changes(?: of the (?:Odoo )?reco
  * Example #1: Then the record should have unsaved changes
  * Example #2: And the record should not have unsaved changes
  * Example #3: Then the form should have unsaved changes
- * Example #4: And the Odoo record should not have unsaved changes
- * Example #5: Then the Odoo form should not have unsaved changes
+ * Example #4: But the form should have unsaved changes
+ * Example #5: Then the form should not have unsaved changes
  *
  */
-Then(/^the (?:Odoo )?(?:record|form) should( not)* have unsaved changes$/, async function (notCase) {
+Then(/^the (?:record|form) should( not)* have unsaved changes$/, async function (notCase) {
   await activeForm(this);
   await settle(this);
   const scope = await activeScope(this.page);
@@ -582,10 +582,10 @@ Then(/^the (?:Odoo )?(?:record|form) should( not)* have unsaved changes$/, async
  * Example #2: When we set the "Expiration" field to "12/31/2030"
  * Example #3: And I set the "Product Type" field to "Service"
  * Example #4: When I set the "e.g. Product Pricing" field to "Office chairs for the new site"
- * Example #5: And we set the "Tags" Odoo field to "Product, Services"
+ * Example #5: And we set the "Tags" field to "Product, Services"
  *
  */
-When(/^(I |we )*set the "([^"]*)" (?:Odoo )?field to "([^"]*)"$/, async function (pronounCase, name, value) {
+When(/^(I |we )*set the "([^"]*)" field to "([^"]*)"$/, async function (pronounCase, name, value) {
   const widget = await findField(this, name);
   await setFieldValue(this, widget, name, value);
 });
@@ -597,12 +597,12 @@ When(/^(I |we )*set the "([^"]*)" (?:Odoo )?field to "([^"]*)"$/, async function
  *
  * Example #1: When I set the fields:
  * Example #2: When we set the fields:
- * Example #3: And I set the Odoo fields:
+ * Example #3: And set the following fields:
  * Example #4: When I set the following fields:
- * Example #5: And we set the following Odoo fields:
+ * Example #5: And we set the following fields:
  *
  */
-When(/^(I |we )*set the (?:following )?(?:Odoo )?fields:$/, async function (pronounCase, dataTable) {
+When(/^(I |we )*set the (?:following )?fields:$/, async function (pronounCase, dataTable) {
   for (const [name, value] of dataTable.raw()) {
     const widget = await findField(this, name);
     await setFieldValue(this, widget, name, value === undefined ? '' : value);
@@ -615,12 +615,12 @@ When(/^(I |we )*set the (?:following )?(?:Odoo )?fields:$/, async function (pron
  *
  * Example #1: When I check the "Can be Sold" field
  * Example #2: When we uncheck the "Can be Purchased" field
- * Example #3: And I check the "Is a Company" Odoo field
+ * Example #3: And I check the "Is a Company" field
  * Example #4: When I tick the "Active" field
- * Example #5: And we untick the "Can be Sold" Odoo field
+ * Example #5: And we untick the "Can be Sold" field
  *
  */
-When(/^(I |we )*(check|uncheck|tick|untick) the "([^"]*)" (?:Odoo )?field$/, async function (pronounCase, action, name) {
+When(/^(I |we )*(check|uncheck|tick|untick) the "([^"]*)" field$/, async function (pronounCase, action, name) {
   const widget = await findField(this, name);
   const { kind } = await describeField(widget);
   if (kind !== 'boolean') {
@@ -637,12 +637,12 @@ When(/^(I |we )*(check|uncheck|tick|untick) the "([^"]*)" (?:Odoo )?field$/, asy
  *
  * Example #1: When I remove "Product" from the "Tags" field
  * Example #2: When we remove "Services" from the "Tags" field
- * Example #3: And I remove "Design" from the "Tags" Odoo field
+ * Example #3: And I remove "Design" from the "Tags" field
  * Example #4: When I remove "Vendor" from the "category_id" field
- * Example #5: And we remove "Information" from the "Tags" Odoo field
+ * Example #5: And we remove "Information" from the "Tags" field
  *
  */
-When(/^(I |we )*remove "([^"]*)" from the "([^"]*)" (?:Odoo )?field$/, async function (pronounCase, tag, name) {
+When(/^(I |we )*remove "([^"]*)" from the "([^"]*)" field$/, async function (pronounCase, tag, name) {
   const widget = await findField(this, name);
   const tags = widget.locator('.o_tag');
   const entry = tags.filter({ hasText: textPattern(tag, { exact: true }) }).first();
@@ -667,11 +667,11 @@ When(/^(I |we )*remove "([^"]*)" from the "([^"]*)" (?:Odoo )?field$/, async fun
  * Example #1: Then the "Customer" field should be "Azure Interior"
  * Example #2: And the "Product Type" field should be "Service"
  * Example #3: Then the "Tags" field should show "Product"
- * Example #4: And the "Customer" Odoo field should not be "Deco Addict"
+ * Example #4: And the "Customer" field should not be "Deco Addict"
  * Example #5: Then the "Email" field should not show "example.org"
  *
  */
-Then(/^the "([^"]*)" (?:Odoo )?field should( not)* (be|show) "([^"]*)"$/, async function (name, notCase, mode, expected) {
+Then(/^the "([^"]*)" field should( not)* (be|show) "([^"]*)"$/, async function (name, notCase, mode, expected) {
   await settle(this);
   const widget = await findField(this, name);
   const wanted = expected.replace(/\s+/g, ' ').trim();
@@ -695,12 +695,12 @@ Then(/^the "([^"]*)" (?:Odoo )?field should( not)* (be|show) "([^"]*)"$/, async 
  *
  * Example #1: Then the "Can be Sold" field should be checked
  * Example #2: And the "Can be Purchased" field should not be checked
- * Example #3: Then the "Is a Company" Odoo field should be checked
+ * Example #3: Then the "Is a Company" field should be checked
  * Example #4: And the "Active" field should be unchecked
- * Example #5: Then the "Can be Sold" Odoo field should be unchecked
+ * Example #5: Then the "Can be Sold" field should be unchecked
  *
  */
-Then(/^the "([^"]*)" (?:Odoo )?field should( not)* be (checked|unchecked)$/, async function (name, notCase, state) {
+Then(/^the "([^"]*)" field should( not)* be (checked|unchecked)$/, async function (name, notCase, state) {
   await settle(this);
   const widget = await findField(this, name);
   const { kind } = await describeField(widget);
@@ -733,12 +733,12 @@ Then(/^the "([^"]*)" (?:Odoo )?field should( not)* be (checked|unchecked)$/, asy
  *
  * Example #1: Then I should see the "Customer" field
  * Example #2: And I should not see the "Margin" field
- * Example #3: Then we should see the "Salesperson" Odoo field
+ * Example #3: Then we should see the "Salesperson" field
  * Example #4: And I should see the "Expected Closing" field
- * Example #5: Then we should not see the "Cost" Odoo field
+ * Example #5: Then we should not see the "Cost" field
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?field$/, async function (pronounCase, notCase, name) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" field$/, async function (pronounCase, notCase, name) {
   await settle(this);
   let found = true;
   let failure = null;
@@ -764,12 +764,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?field$/, async functio
  *
  * Example #1: Then the "Customer" field should be required
  * Example #2: And the "Total" field should be read-only
- * Example #3: Then the "Customer" Odoo field should be invalid
+ * Example #3: Then the "Customer" field should be invalid
  * Example #4: And the "Expiration" field should not be required
  * Example #5: Then the "Customer" field should not be read-only
  *
  */
-Then(/^the "([^"]*)" (?:Odoo )?field should( not)* be (required|read-only|readonly|invalid)$/, async function (name, notCase, state) {
+Then(/^the "([^"]*)" field should( not)* be (required|read-only|readonly|invalid)$/, async function (name, notCase, state) {
   await settle(this);
   const widget = await findField(this, name);
   const classes = { required: 'o_required_modifier', 'read-only': 'o_readonly_modifier', readonly: 'o_readonly_modifier', invalid: 'o_field_invalid' };
@@ -801,12 +801,12 @@ Then(/^the "([^"]*)" (?:Odoo )?field should( not)* be (required|read-only|readon
  *
  * Example #1: When I click the "Confirm" button in the form
  * Example #2: When we click the "New Quotation" button in the form
- * Example #3: And I click the "Create Invoice" button in the Odoo form
+ * Example #3: And I click the "Create Invoice" button in the form
  * Example #4: When I click the "Won" button of the form
- * Example #5: And we click the "Add" button of the Odoo form
+ * Example #5: And we click the "Add" button of the form
  *
  */
-When(/^(I |we )*click the "([^"]*)" button (?:in|of) the (?:Odoo )?form$/, async function (pronounCase, text) {
+When(/^(I |we )*click the "([^"]*)" button (?:in|of) the form$/, async function (pronounCase, text) {
   await activeForm(this).catch(() => {});
   const { button, offered } = await findButton(this, text);
   if (!button) {
@@ -827,12 +827,12 @@ When(/^(I |we )*click the "([^"]*)" button (?:in|of) the (?:Odoo )?form$/, async
  *
  * Example #1: Then I should see the "Confirm" button in the form
  * Example #2: And I should not see the "Create Invoice" button in the form
- * Example #3: Then we should see the "Send by Email" button in the Odoo form
+ * Example #3: Then we should see the "Send by Email" button in the form
  * Example #4: And I should not see the "Confirm" button of the form
- * Example #5: Then we should not see the "Cancel" button of the Odoo form
+ * Example #5: Then we should not see the "Cancel" button of the form
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" button (?:in|of) the (?:Odoo )?form$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" button (?:in|of) the form$/, async function (pronounCase, notCase, text) {
   await activeForm(this);
   await settle(this);
   const { buttons } = await scopeButtons(this);
@@ -852,10 +852,10 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" button (?:in|of) the (?:Odoo )?f
  * Example #2: And the stage should be "Qualified"
  * Example #3: Then the record status should be "Quotation"
  * Example #4: And the status should not be "Cancelled"
- * Example #5: Then the Odoo record stage should not be "Won"
+ * Example #5: Then the record stage should not be "Won"
  *
  */
-Then(/^the (?:Odoo )?(?:record )?(?:status|stage) should( not)* be "([^"]*)"$/, async function (notCase, expected) {
+Then(/^the (?:record )?(?:status|stage) should( not)* be "([^"]*)"$/, async function (notCase, expected) {
   const form = await activeForm(this);
   await settle(this);
   const bar = form.locator('.o_statusbar_status').first();
@@ -880,11 +880,11 @@ Then(/^the (?:Odoo )?(?:record )?(?:status|stage) should( not)* be "([^"]*)"$/, 
  * Example #1: When I set the stage to "Proposition"
  * Example #2: When we set the stage to "Qualified"
  * Example #3: And I set the status to "Won"
- * Example #4: When I set the Odoo record stage to "New"
+ * Example #4: When I set the record stage to "New"
  * Example #5: And we set the record status to "In Progress"
  *
  */
-When(/^(I |we )*set the (?:Odoo )?(?:record )?(?:status|stage) to "([^"]*)"$/, async function (pronounCase, name) {
+When(/^(I |we )*set the (?:record )?(?:status|stage) to "([^"]*)"$/, async function (pronounCase, name) {
   const page = this.page;
   const form = await activeForm(this);
   await settle(this);
@@ -922,12 +922,12 @@ When(/^(I |we )*set the (?:Odoo )?(?:record )?(?:status|stage) to "([^"]*)"$/, a
  *
  * Example #1: When I open the "Order Lines" tab
  * Example #2: When we open the "Other Info" tab
- * Example #3: And I open the "Sales & Purchase" Odoo tab
+ * Example #3: And I open the "Sales & Purchase" tab
  * Example #4: When I open the "Internal Notes" tab
- * Example #5: And we open the "Extra Information" Odoo tab
+ * Example #5: And we open the "Extra Information" tab
  *
  */
-When(/^(I |we )*open the "([^"]*)" (?:Odoo )?tab$/, async function (pronounCase, title) {
+When(/^(I |we )*open the "([^"]*)" tab$/, async function (pronounCase, title) {
   const form = await activeForm(this);
   const tabs = form.locator('.o_notebook_headers .nav-link:visible');
   const tab = tabs.filter({ hasText: textPattern(title, { exact: true }) }).first();
@@ -949,12 +949,12 @@ When(/^(I |we )*open the "([^"]*)" (?:Odoo )?tab$/, async function (pronounCase,
  *
  * Example #1: Then I should see the "Order Lines" tab
  * Example #2: And I should not see the "Accounting" tab
- * Example #3: Then we should see the "Other Info" Odoo tab
+ * Example #3: Then we should see the "Other Info" tab
  * Example #4: And I should see the "Internal Notes" tab
- * Example #5: Then we should not see the "Invoicing" Odoo tab
+ * Example #5: Then we should not see the "Invoicing" tab
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?tab$/, async function (pronounCase, notCase, title) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" tab$/, async function (pronounCase, notCase, title) {
   const form = await activeForm(this);
   await settle(this);
   const tabs = form.locator('.o_notebook_headers .nav-link:visible');
@@ -976,12 +976,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?tab$/, async function 
  *
  * Example #1: When I add a line with "Add a product":
  * Example #2: When we add a line with "Add a line":
- * Example #3: And I add an Odoo line with "Add a product":
+ * Example #3: And I add an line with "Add a product":
  * Example #4: When I add a line with "Add a section":
- * Example #5: And we add an Odoo line with "Add a line":
+ * Example #5: And we add an line with "Add a line":
  *
  */
-When(/^(I |we )*add an? (?:Odoo )?line with "([^"]*)":$/, async function (pronounCase, linkText, dataTable) {
+When(/^(I |we )*add an? line with "([^"]*)":$/, async function (pronounCase, linkText, dataTable) {
   const page = this.page;
   const form = await activeForm(this);
   await settle(this);
@@ -1033,12 +1033,12 @@ When(/^(I |we )*add an? (?:Odoo )?line with "([^"]*)":$/, async function (pronou
  *
  * Example #1: Then I should see the line "Office Chair"
  * Example #2: And I should see the line "Large Cabinet"
- * Example #3: Then we should see the Odoo line "Virtual Interior Design"
+ * Example #3: Then we should see the line "Virtual Interior Design"
  * Example #4: And I should not see the line "Office Lamp"
- * Example #5: Then we should not see the Odoo line "Desk Combination"
+ * Example #5: Then we should not see the line "Desk Combination"
  *
  */
-Then(/^(I |we )*should( not)* see the (?:Odoo )?line "([^"]*)"$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see the line "([^"]*)"$/, async function (pronounCase, notCase, text) {
   const form = await activeForm(this);
   await settle(this);
   const rows = form.locator('.o_field_x2many .o_list_renderer tr.o_data_row');
@@ -1059,12 +1059,12 @@ Then(/^(I |we )*should( not)* see the (?:Odoo )?line "([^"]*)"$/, async function
  *
  * Example #1: Then I should see a dialog
  * Example #2: And I should see the "Confirmation" dialog
- * Example #3: Then we should see the "Cancel Sales Order" Odoo dialog
+ * Example #3: Then we should see the "Cancel Sales Order" dialog
  * Example #4: And I should not see a dialog
  * Example #5: Then we should not see the "Access Error" dialog
  *
  */
-Then(/^(I |we )*should( not)* see (?:an? (?:Odoo )?dialog|the "([^"]*)" (?:Odoo )?dialog)$/, async function (pronounCase, notCase, title) {
+Then(/^(I |we )*should( not)* see (?:an? dialog|the "([^"]*)" dialog)$/, async function (pronounCase, notCase, title) {
   const page = this.page;
   await settle(this);
   const dialogs = page.locator('.modal[role="dialog"]:visible, .modal.show:visible');
@@ -1087,12 +1087,12 @@ Then(/^(I |we )*should( not)* see (?:an? (?:Odoo )?dialog|the "([^"]*)" (?:Odoo 
  *
  * Example #1: Then I should see "Are you sure" in the dialog
  * Example #2: And I should see "You are not allowed" in the dialog
- * Example #3: Then we should see "cancel" in the Odoo dialog
+ * Example #3: Then we should see "cancel" in the dialog
  * Example #4: And I should not see "error" in the dialog
- * Example #5: Then we should not see "Traceback" in the Odoo dialog
+ * Example #5: Then we should not see "Traceback" in the dialog
  *
  */
-Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?dialog$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see "([^"]*)" in the dialog$/, async function (pronounCase, notCase, text) {
   const page = this.page;
   await settle(this);
   const dialog = topDialog(page);
@@ -1109,12 +1109,12 @@ Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?dialog$/, async fun
  *
  * Example #1: When I click the "Ok" button in the dialog
  * Example #2: When we click the "Discard" button in the dialog
- * Example #3: And I click the "Save & Close" button in the Odoo dialog
+ * Example #3: And I click the "Save & Close" button in the dialog
  * Example #4: When I click the "Cancel" button of the dialog
- * Example #5: And we click the "Create Draft Invoice" button of the Odoo dialog
+ * Example #5: And we click the "Create Draft Invoice" button of the dialog
  *
  */
-When(/^(I |we )*click the "([^"]*)" button (?:in|of) the (?:Odoo )?dialog$/, async function (pronounCase, text) {
+When(/^(I |we )*click the "([^"]*)" button (?:in|of) the dialog$/, async function (pronounCase, text) {
   const page = this.page;
   await settle(this);
   if (!(await dialogIsOpen(page))) {
@@ -1143,11 +1143,11 @@ When(/^(I |we )*click the "([^"]*)" button (?:in|of) the (?:Odoo )?dialog$/, asy
  * Example #1: When I confirm the dialog
  * Example #2: When we confirm the dialog
  * Example #3: And I close the dialog
- * Example #4: When I dismiss the Odoo dialog
- * Example #5: And we confirm the Odoo dialog
+ * Example #4: When I dismiss the dialog
+ * Example #5: And we close the dialog
  *
  */
-When(/^(I |we )*(confirm|close|dismiss) the (?:Odoo )?dialog$/, async function (pronounCase, action) {
+When(/^(I |we )*(confirm|close|dismiss) the dialog$/, async function (pronounCase, action) {
   const page = this.page;
   await settle(this);
   const dialog = topDialog(page);
@@ -1187,12 +1187,12 @@ When(/^(I |we )*(confirm|close|dismiss) the (?:Odoo )?dialog$/, async function (
  *
  * Example #1: Then I should see an access error
  * Example #2: And I should not see an access error
- * Example #3: Then we should see an Odoo access error
+ * Example #3: Then we should see an access error
  * Example #4: And I should see an access error "You are not allowed to access"
- * Example #5: Then we should see an Odoo access error "Sales Order"
+ * Example #5: Then we should see an access error "Sales Order"
  *
  */
-Then(/^(I |we )*should( not)* see an (?:Odoo )?access error(?: "([^"]*)")?$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see an access error(?: "([^"]*)")?$/, async function (pronounCase, notCase, text) {
   const page = this.page;
   await settle(this);
   const dialog = page.locator('.modal[role="dialog"]:visible').filter({ has: page.locator('.o_error_dialog') }).filter({ has: page.locator('.modal-title', { hasText: /Access (Error|Denied)/ }) }).last();
@@ -1221,10 +1221,10 @@ Then(/^(I |we )*should( not)* see an (?:Odoo )?access error(?: "([^"]*)")?$/, as
  * Example #2: And I should see the success notification "saved"
  * Example #3: Then we should see the danger notification "Invalid fields"
  * Example #4: And I should not see the notification "Invalid fields"
- * Example #5: Then we should see the warning Odoo notification "Warning"
+ * Example #5: Then we should see the warning notification "Warning"
  *
  */
-Then(/^(I |we )*should( not)* see the (?:(success|warning|danger|info) )?(?:Odoo )?notification "([^"]*)"$/, async function (pronounCase, notCase, kind, text) {
+Then(/^(I |we )*should( not)* see the (?:(success|warning|danger|info) )?notification "([^"]*)"$/, async function (pronounCase, notCase, kind, text) {
   const page = this.page;
   const notifications = page.locator('.o_notification_manager .o_notification');
   const matching = notifications.filter({ hasText: textPattern(text) });
@@ -1244,11 +1244,11 @@ Then(/^(I |we )*should( not)* see the (?:(success|warning|danger|info) )?(?:Odoo
  * Example #1: When I close the notifications
  * Example #2: When we close the notifications
  * Example #3: And I close the notification
- * Example #4: When I close the Odoo notifications
- * Example #5: And we close the Odoo notification
+ * Example #4: When close the notifications
+ * Example #5: And we close the notification
  *
  */
-When(/^(I |we )*close the (?:Odoo )?notifications?$/, async function (pronounCase) {
+When(/^(I |we )*close the notifications?$/, async function (pronounCase) {
   const page = this.page;
   const closers = page.locator('.o_notification_manager .o_notification .o_notification_close');
   let guard = 10;
@@ -1330,12 +1330,12 @@ async function writeInChatter(world, kind, text) {
  *
  * Example #1: Then I should see the chatter
  * Example #2: And I should not see the chatter
- * Example #3: Then we should see the Odoo chatter
+ * Example #3: Then we should see the chatter
  * Example #4: And I should see the chatter of the record
- * Example #5: Then we should not see the Odoo chatter of the record
+ * Example #5: Then we should not see the chatter of the record
  *
  */
-Then(/^(I |we )*should( not)* see the (?:Odoo )?chatter(?: of the record)?$/, async function (pronounCase, notCase) {
+Then(/^(I |we )*should( not)* see the chatter(?: of the record)?$/, async function (pronounCase, notCase) {
   await settle(this);
   await assertPresence(this.page.locator('.o-mail-Chatter:visible').first(), notCase, 'the chatter (".o-mail-Chatter")', {
     timeout: SHORT_TIMEOUT,
@@ -1350,12 +1350,12 @@ Then(/^(I |we )*should( not)* see the (?:Odoo )?chatter(?: of the record)?$/, as
  *
  * Example #1: When I log the note "Called the customer, waiting for the order"
  * Example #2: When we log the note "Checked by the review"
- * Example #3: And I log the Odoo note "Price confirmed"
+ * Example #3: And I log the note "Price confirmed"
  * Example #4: When I log the internal note "Reminder sent"
- * Example #5: And we log the internal Odoo note "Left a voice mail"
+ * Example #5: And we log the internal note "Left a voice mail"
  *
  */
-When(/^(I |we )*log the (?:internal )?(?:Odoo )?note "([^"]*)"$/, async function (pronounCase, text) {
+When(/^(I |we )*log the (?:internal )?note "([^"]*)"$/, async function (pronounCase, text) {
   await writeInChatter(this, 'note', text);
 });
 
@@ -1367,12 +1367,12 @@ When(/^(I |we )*log the (?:internal )?(?:Odoo )?note "([^"]*)"$/, async function
  *
  * Example #1: When I send the message "Your order is confirmed"
  * Example #2: When we send the message "Thank you for your request"
- * Example #3: And I send the Odoo message "The quotation is attached"
+ * Example #3: And I send the message "The quotation is attached"
  * Example #4: When I send the chatter message "We will call you back"
- * Example #5: And we send the Odoo chatter message "Delivery is planned"
+ * Example #5: And we send the chatter message "Delivery is planned"
  *
  */
-When(/^(I |we )*send the (?:Odoo )?(?:chatter )?message "([^"]*)"$/, async function (pronounCase, text) {
+When(/^(I |we )*send the (?:chatter )?message "([^"]*)"$/, async function (pronounCase, text) {
   await writeInChatter(this, 'message', text);
 });
 
@@ -1383,12 +1383,12 @@ When(/^(I |we )*send the (?:Odoo )?(?:chatter )?message "([^"]*)"$/, async funct
  *
  * Example #1: Then I should see "Called the customer" in the chatter
  * Example #2: And I should see "Quotation confirmed" in the chatter
- * Example #3: Then we should see "Stage" in the Odoo chatter
+ * Example #3: Then we should see "Stage" in the chatter
  * Example #4: And I should not see "Internal remark" in the chatter
- * Example #5: Then we should not see "Lost" in the Odoo chatter
+ * Example #5: Then we should not see "Lost" in the chatter
  *
  */
-Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?chatter$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see "([^"]*)" in the chatter$/, async function (pronounCase, notCase, text) {
   const chatter = await requireChatter(this);
   await settle(this);
   await assertText(chatter.locator('.o-mail-Message'), text, notCase, 'the messages of the chatter (".o-mail-Message")', {

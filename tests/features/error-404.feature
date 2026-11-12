@@ -5,5 +5,5 @@ Feature: Odoo 404 page
 
   Scenario: An unknown URL renders the Odoo 404 template
     Given I am on "/this-page-does-not-exist-odoo-steps"
-    Then I should be on the Odoo 404 page
+    Then I should be on the 404 page
     And the response status code should be 404

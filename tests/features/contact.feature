@@ -4,8 +4,8 @@ Feature: Odoo contact form
   So that the site owner can answer me
 
   Scenario: The contact page shows the form
-    Given I am on the Odoo contact us page
-    Then I should see the Odoo contact us form
+    Given I am on the contact us page
+    Then I should see the contact us form
     And the response status code should be 200
 
   @critical

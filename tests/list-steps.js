@@ -40,7 +40,7 @@ function stepsOf(file) {
 const out = [
   '# Steps',
   '',
-  'Every step of `@webship-js/odoo-steps`, written from the step definitions by `npm run docs:steps`. Each step is shown by its first example; the comment above its definition gives four more and names the markup the step relies on. The word "Odoo" is optional in every sentence, and every assertion takes `not`.',
+  'Every step of `@webship-js/odoo-steps`, written from the step definitions by `npm run docs:steps`. Each step is shown by its first example; the comment above its definition gives four more and names the markup the step relies on. Every assertion takes `not`.',
   '',
 ];
 let total = 0;

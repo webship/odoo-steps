@@ -277,12 +277,12 @@ async function findColumn(world, title) {
  *
  * Example #1: When I open the "CRM" app
  * Example #2: When we open the "Sales" app
- * Example #3: And I open the "Contacts" Odoo app
+ * Example #3: And I open the "Contacts" app
  * Example #4: When I open the "Invoicing" application
- * Example #5: And we open the "Website" Odoo application
+ * Example #5: And we open the "Website" application
  *
  */
-When(/^(I |we )*open the "([^"]*)" (?:Odoo )?app(?:lication)?$/, async function (pronounCase, name) {
+When(/^(I |we )*open the "([^"]*)" app(?:lication)?$/, async function (pronounCase, name) {
   const page = this.page;
   const apps = await openAppsMenu(this);
   const app = apps.filter({ hasText: textPattern(name, { exact: true }) }).first();
@@ -315,12 +315,12 @@ When(/^(I |we )*open the "([^"]*)" (?:Odoo )?app(?:lication)?$/, async function 
  *
  * Example #1: Then I should see the "CRM" app
  * Example #2: And I should not see the "Invoicing" app
- * Example #3: Then we should see the "Sales" Odoo app
+ * Example #3: Then we should see the "Sales" app
  * Example #4: And I should not see the "Settings" application
- * Example #5: Then we should not see the "Website" Odoo application
+ * Example #5: Then we should not see the "Website" application
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?app(?:lication)?$/, async function (pronounCase, notCase, name) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" app(?:lication)?$/, async function (pronounCase, notCase, name) {
   const apps = await openAppsMenu(this);
   const offered = await listTexts(apps, 40);
   const listed = (await apps.filter({ hasText: textPattern(name, { exact: true }) }).count()) > 0;
@@ -340,12 +340,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?app(?:lication)?$/, as
  *
  * Example #1: Then I should be in the "CRM" app
  * Example #2: And I should be in the "Sales" app
- * Example #3: Then we should be in the "Contacts" Odoo app
+ * Example #3: Then we should be in the "Contacts" app
  * Example #4: And I should not be in the "Discuss" app
  * Example #5: Then we should not be in the "Invoicing" application
  *
  */
-Then(/^(I |we )*should( not)* be in the "([^"]*)" (?:Odoo )?app(?:lication)?$/, async function (pronounCase, notCase, name) {
+Then(/^(I |we )*should( not)* be in the "([^"]*)" app(?:lication)?$/, async function (pronounCase, notCase, name) {
   await waitForWebClient(this);
   await assertText(this.page.locator('.o_main_navbar .o_menu_brand'), name, notCase, 'the app name in the navigation bar (".o_menu_brand")', {
     exact: true,
@@ -359,12 +359,12 @@ Then(/^(I |we )*should( not)* be in the "([^"]*)" (?:Odoo )?app(?:lication)?$/, 
  *
  * Example #1: When I open the "Orders > Quotations" menu
  * Example #2: When we open the "Sales > My Pipeline" menu
- * Example #3: And I open the "Customers > Invoices" Odoo menu
+ * Example #3: And I open the "Customers > Invoices" menu
  * Example #4: When I open the "Configuration > Contact Tags" menu
  * Example #5: And we open the "Reporting" menu
  *
  */
-When(/^(I |we )*open the "([^"]*)" (?:Odoo )?menu$/, async function (pronounCase, path) {
+When(/^(I |we )*open the "([^"]*)" menu$/, async function (pronounCase, path) {
   const entry = await reachMenu(this, path);
   await entry.click();
   await settle(this);
@@ -377,12 +377,12 @@ When(/^(I |we )*open the "([^"]*)" (?:Odoo )?menu$/, async function (pronounCase
  *
  * Example #1: Then I should see the "Orders" menu
  * Example #2: And I should not see the "Configuration" menu
- * Example #3: Then we should see the "Orders > Quotations" Odoo menu
+ * Example #3: Then we should see the "Orders > Quotations" menu
  * Example #4: And I should not see the "Reporting" menu
  * Example #5: Then we should not see the "Configuration > Settings" menu
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?menu$/, async function (pronounCase, notCase, path) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" menu$/, async function (pronounCase, notCase, path) {
   const page = this.page;
   let found = true;
   let failure = null;
@@ -411,12 +411,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?menu$/, async function
  *
  * Example #1: When I open the "sale.action_quotations_with_onboarding" action
  * Example #2: When we open the "crm.crm_lead_action_pipeline" action
- * Example #3: And I open the "contacts.action_contacts" Odoo action
+ * Example #3: And I open the "contacts.action_contacts" action
  * Example #4: When I open the "account.action_move_out_invoice_type" action
- * Example #5: And we open the "base.action_res_users" Odoo action
+ * Example #5: And we open the "base.action_res_users" action
  *
  */
-When(/^(I |we )*open the "([\w.]+)" (?:Odoo )?action$/, async function (pronounCase, externalId) {
+When(/^(I |we )*open the "([\w.]+)" action$/, async function (pronounCase, externalId) {
   const page = this.page;
   if (!/^\w+\.\w+$/.test(externalId)) {
     throw friendly({
@@ -448,12 +448,12 @@ When(/^(I |we )*open the "([\w.]+)" (?:Odoo )?action$/, async function (pronounC
  *
  * Example #1: Then I should see "Quotations" in the breadcrumb
  * Example #2: And I should see "Pipeline" in the breadcrumb
- * Example #3: Then we should see "S00045" in the Odoo breadcrumb
+ * Example #3: Then we should see "S00045" in the breadcrumb
  * Example #4: And I should not see "Invoices" in the breadcrumb
- * Example #5: Then we should not see "New" in the Odoo breadcrumb
+ * Example #5: Then we should not see "New" in the breadcrumb
  *
  */
-Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?breadcrumb$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see "([^"]*)" in the breadcrumb$/, async function (pronounCase, notCase, text) {
   await settle(this);
   const scope = await activeScope(this.page);
   const parts = scope.locator('.o_breadcrumb .breadcrumb-item, .o_breadcrumb .o_last_breadcrumb_item');
@@ -469,12 +469,12 @@ Then(/^(I |we )*should( not)* see "([^"]*)" in the (?:Odoo )?breadcrumb$/, async
  *
  * Example #1: Then the breadcrumb title should be "Quotations"
  * Example #2: And the breadcrumb title should be "Pipeline"
- * Example #3: Then the Odoo breadcrumb title should be "New"
+ * Example #3: Then the breadcrumb title should be "New"
  * Example #4: And the breadcrumb title should not be "New"
- * Example #5: Then the Odoo breadcrumb title should not be "Invoices"
+ * Example #5: Then the breadcrumb title should not be "Invoices"
  *
  */
-Then(/^the (?:Odoo )?breadcrumb title should( not)* be "([^"]*)"$/, async function (notCase, text) {
+Then(/^the breadcrumb title should( not)* be "([^"]*)"$/, async function (notCase, text) {
   await settle(this);
   const scope = await activeScope(this.page);
   await assertText(scope.locator('.o_breadcrumb .o_last_breadcrumb_item'), text, notCase, 'the breadcrumb title (".o_last_breadcrumb_item")', {
@@ -489,12 +489,12 @@ Then(/^the (?:Odoo )?breadcrumb title should( not)* be "([^"]*)"$/, async functi
  *
  * Example #1: When I go back to "Quotations" in the breadcrumb
  * Example #2: When we go back to "Pipeline" in the breadcrumb
- * Example #3: And I go back to "Contacts" in the Odoo breadcrumb
+ * Example #3: And I go back to "Contacts" in the breadcrumb
  * Example #4: When I go back to "Invoices" in the breadcrumb
- * Example #5: And we go back to "Products" in the Odoo breadcrumb
+ * Example #5: And we go back to "Products" in the breadcrumb
  *
  */
-When(/^(I |we )*go back to "([^"]*)" in the (?:Odoo )?breadcrumb$/, async function (pronounCase, text) {
+When(/^(I |we )*go back to "([^"]*)" in the breadcrumb$/, async function (pronounCase, text) {
   const scope = await activeScope(this.page);
   const items = scope.locator('.o_breadcrumb .breadcrumb-item');
   const item = items.filter({ hasText: textPattern(text, { exact: true }) }).first();
@@ -522,11 +522,11 @@ When(/^(I |we )*go back to "([^"]*)" in the (?:Odoo )?breadcrumb$/, async functi
  * Example #1: When I switch to the list view
  * Example #2: When we switch to the kanban view
  * Example #3: And I switch to the "pivot" view
- * Example #4: When I switch to the Odoo graph view
- * Example #5: And we switch to the "calendar" Odoo view
+ * Example #4: When I switch to the graph view
+ * Example #5: And we switch to the "calendar" view
  *
  */
-When(/^(I |we )*switch to the (?:Odoo )?"?(list|kanban|form|calendar|pivot|graph|activity|map|gantt|cohort)"? (?:Odoo )?view$/, async function (pronounCase, type) {
+When(/^(I |we )*switch to the "?(list|kanban|form|calendar|pivot|graph|activity|map|gantt|cohort)"? view$/, async function (pronounCase, type) {
   const page = this.page;
   const scope = await activeScope(page);
   await settle(this);
@@ -561,11 +561,11 @@ When(/^(I |we )*switch to the (?:Odoo )?"?(list|kanban|form|calendar|pivot|graph
  * Example #1: Then I should see the list view
  * Example #2: And I should see the kanban view
  * Example #3: Then we should see the "form" view
- * Example #4: And I should not see the Odoo list view
- * Example #5: Then we should not see the "kanban" Odoo view
+ * Example #4: And I should not see the list view
+ * Example #5: Then we should not see the "kanban" view
  *
  */
-Then(/^(I |we )*should( not)* see the (?:Odoo )?"?(list|kanban|form|calendar|pivot|graph|activity|map|gantt|cohort)"? (?:Odoo )?view$/, async function (pronounCase, notCase, type) {
+Then(/^(I |we )*should( not)* see the "?(list|kanban|form|calendar|pivot|graph|activity|map|gantt|cohort)"? view$/, async function (pronounCase, notCase, type) {
   await settle(this);
   const scope = await activeScope(this.page);
   await assertPresence(scope.locator(`.o_${type}_view, .o_${type}_renderer`).first(), notCase, `the ${type} view (".o_${type}_view")`, {
@@ -586,11 +586,11 @@ Then(/^(I |we )*should( not)* see the (?:Odoo )?"?(list|kanban|form|calendar|piv
  * Example #1: When I search the records for "chair"
  * Example #2: When we search the records for "Azure"
  * Example #3: And I search the records for "Azure Interior" in "Customer"
- * Example #4: When I search the Odoo records for "S00007"
+ * Example #4: When I search the records for "S00007"
  * Example #5: And we search the records for "Mitchell" in "Salesperson"
  *
  */
-When(/^(I |we )*search the (?:Odoo )?records for "([^"]*)"(?: in "([^"]*)")?$/, async function (pronounCase, text, field) {
+When(/^(I |we )*search the records for "([^"]*)"(?: in "([^"]*)")?$/, async function (pronounCase, text, field) {
   const page = this.page;
   const { input } = await requireSearchView(this);
   await input.fill(text);
@@ -621,12 +621,12 @@ When(/^(I |we )*search the (?:Odoo )?records for "([^"]*)"(?: in "([^"]*)")?$/, 
  *
  * Example #1: When I filter the records by "Won"
  * Example #2: When we filter the records by "My Quotations"
- * Example #3: And I filter the Odoo records by "Archived"
+ * Example #3: And I filter the records by "Archived"
  * Example #4: When I toggle the "My Pipeline" filter
- * Example #5: And we toggle the "Companies" Odoo filter
+ * Example #5: And we toggle the "Companies" filter
  *
  */
-When(/^(I |we )*(?:filter the (?:Odoo )?records by "([^"]*)"|toggle the "([^"]*)" (?:Odoo )?filter)$/, async function (pronounCase, nameA, nameB) {
+When(/^(I |we )*(?:filter the records by "([^"]*)"|toggle the "([^"]*)" filter)$/, async function (pronounCase, nameA, nameB) {
   await toggleSearchOption(this, 'filter', nameA || nameB);
 });
 
@@ -636,12 +636,12 @@ When(/^(I |we )*(?:filter the (?:Odoo )?records by "([^"]*)"|toggle the "([^"]*)
  *
  * Example #1: When I group the records by "Salesperson"
  * Example #2: When we group the records by "Stage"
- * Example #3: And I group the Odoo records by "Customer"
+ * Example #3: And I group the records by "Customer"
  * Example #4: When I group the records by "Country"
- * Example #5: And we group the Odoo records by "Sales Team"
+ * Example #5: And we group the records by "Sales Team"
  *
  */
-When(/^(I |we )*group the (?:Odoo )?records by "([^"]*)"$/, async function (pronounCase, name) {
+When(/^(I |we )*group the records by "([^"]*)"$/, async function (pronounCase, name) {
   await toggleSearchOption(this, 'group', name);
 });
 
@@ -652,12 +652,12 @@ When(/^(I |we )*group the (?:Odoo )?records by "([^"]*)"$/, async function (pron
  *
  * Example #1: Then I should see the "My Pipeline" search facet
  * Example #2: And I should see the "chair" search facet
- * Example #3: Then we should see the "Salesperson" Odoo search facet
+ * Example #3: Then we should see the "Salesperson" search facet
  * Example #4: And I should not see the "Won" search facet
- * Example #5: Then we should not see the "Archived" Odoo search facet
+ * Example #5: Then we should not see the "Archived" search facet
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?search facet$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" search facet$/, async function (pronounCase, notCase, text) {
   const { scope } = await requireSearchView(this);
   await settle(this);
   const facets = scope.locator('.o_searchview .o_searchview_facet');
@@ -673,12 +673,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?search facet$/, async 
  *
  * Example #1: When I remove the "My Pipeline" search facet
  * Example #2: When we remove the "chair" search facet
- * Example #3: And I remove the "Salesperson" Odoo search facet
+ * Example #3: And I remove the "Salesperson" search facet
  * Example #4: When I remove the "Won" search facet
- * Example #5: And we remove the "My Quotations" Odoo search facet
+ * Example #5: And we remove the "My Quotations" search facet
  *
  */
-When(/^(I |we )*remove the "([^"]*)" (?:Odoo )?search facet$/, async function (pronounCase, text) {
+When(/^(I |we )*remove the "([^"]*)" search facet$/, async function (pronounCase, text) {
   const { scope } = await requireSearchView(this);
   const facets = scope.locator('.o_searchview .o_searchview_facet');
   const facet = facets.filter({ hasText: textPattern(text) }).first();
@@ -702,12 +702,12 @@ When(/^(I |we )*remove the "([^"]*)" (?:Odoo )?search facet$/, async function (p
  *
  * Example #1: When I clear the search
  * Example #2: When we clear the search
- * Example #3: And I clear the Odoo search
+ * Example #3: And clear the search
  * Example #4: When I clear the search view
- * Example #5: And we clear the Odoo search view
+ * Example #5: And we clear the search view
  *
  */
-When(/^(I |we )*clear the (?:Odoo )?search(?: view)?$/, async function (pronounCase) {
+When(/^(I |we )*clear the search(?: view)?$/, async function (pronounCase) {
   const { scope, input } = await requireSearchView(this);
   const facets = scope.locator('.o_searchview .o_searchview_facet');
   await input.fill('');
@@ -732,12 +732,12 @@ When(/^(I |we )*clear the (?:Odoo )?search(?: view)?$/, async function (pronounC
  *
  * Example #1: Then I should see the "Azure Interior" record
  * Example #2: And I should see the "S00007" record
- * Example #3: Then we should see the "Quote for 600 Chairs" Odoo record
+ * Example #3: Then we should see the "Quote for 600 Chairs" record
  * Example #4: And I should not see the "Deco Addict" record
- * Example #5: Then we should not see the "S00001" Odoo record
+ * Example #5: Then we should not see the "S00001" record
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?record$/, async function (pronounCase, notCase, text) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" record$/, async function (pronounCase, notCase, text) {
   const { record, kind } = await findRecord(this, text);
   await assertPresence(record, notCase, `a record showing "${text}" in the ${kind} view`, {
     timeout: SHORT_TIMEOUT,
@@ -751,12 +751,12 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?record$/, async functi
  *
  * Example #1: When I open the "Azure Interior" record
  * Example #2: When we open the "S00007" record
- * Example #3: And I open the "Quote for 600 Chairs" Odoo record
+ * Example #3: And I open the "Quote for 600 Chairs" record
  * Example #4: When I open the "Deco Addict" record
- * Example #5: And we open the "INV/2026/00001" Odoo record
+ * Example #5: And we open the "INV/2026/00001" record
  *
  */
-When(/^(I |we )*open the "([^"]*)" (?:Odoo )?record$/, async function (pronounCase, text) {
+When(/^(I |we )*open the "([^"]*)" record$/, async function (pronounCase, text) {
   const page = this.page;
   const { record, kind } = await findRecord(this, text);
   try {
@@ -795,12 +795,12 @@ When(/^(I |we )*open the "([^"]*)" (?:Odoo )?record$/, async function (pronounCa
  *
  * Example #1: Then I should see 3 records
  * Example #2: And I should see 1 record
- * Example #3: Then we should see 15 Odoo records
+ * Example #3: Then we should see 15 records
  * Example #4: And I should see 0 records
  * Example #5: Then we should see 80 records
  *
  */
-Then(/^(I |we )*should see (\d+) (?:Odoo )?records?$/, async function (pronounCase, expected) {
+Then(/^(I |we )*should see (\d+) records?$/, async function (pronounCase, expected) {
   const page = this.page;
   const { records, kind } = await recordsOnScreen(this);
   const wanted = Number(expected);
@@ -826,12 +826,12 @@ Then(/^(I |we )*should see (\d+) (?:Odoo )?records?$/, async function (pronounCa
  *
  * Example #1: Then I should see no records
  * Example #2: And I should see no record
- * Example #3: Then we should see no Odoo records
+ * Example #3: Then we should see no records
  * Example #4: And I should see no records at all
- * Example #5: Then we should see no Odoo record
+ * Example #5: Then we should see no record
  *
  */
-Then(/^(I |we )*should see no (?:Odoo )?records?(?: at all)?$/, async function (pronounCase) {
+Then(/^(I |we )*should see no records?(?: at all)?$/, async function (pronounCase) {
   const { records, kind } = await recordsOnScreen(this);
   const deadline = Date.now() + SHORT_TIMEOUT;
   let count = await records.count();
@@ -859,11 +859,11 @@ Then(/^(I |we )*should see no (?:Odoo )?records?(?: at all)?$/, async function (
  * Example #1: When I select the "S00007" record
  * Example #2: When we select the "Azure Interior" record
  * Example #3: And I unselect the "S00007" record
- * Example #4: When I select the "Deco Addict" Odoo record
- * Example #5: And we unselect the "Azure Interior" Odoo record
+ * Example #4: When I select the "Deco Addict" record
+ * Example #5: And we unselect the "Azure Interior" record
  *
  */
-When(/^(I |we )*(select|unselect) the "([^"]*)" (?:Odoo )?record$/, async function (pronounCase, action, text) {
+When(/^(I |we )*(select|unselect) the "([^"]*)" record$/, async function (pronounCase, action, text) {
   const view = await requireView(this, 'list');
   await settle(this);
   const row = view.locator('tr.o_data_row').filter({ hasText: textPattern(text) }).first();
@@ -888,11 +888,11 @@ When(/^(I |we )*(select|unselect) the "([^"]*)" (?:Odoo )?record$/, async functi
  * Example #1: When I select all records
  * Example #2: When we select all records
  * Example #3: And I select all the records
- * Example #4: When I select all Odoo records
- * Example #5: And we select all the Odoo records
+ * Example #4: When select all records
+ * Example #5: And we select all the records
  *
  */
-When(/^(I |we )*select all (?:the )?(?:Odoo )?records$/, async function (pronounCase) {
+When(/^(I |we )*select all (?:the )?records$/, async function (pronounCase) {
   const view = await requireView(this, 'list');
   await settle(this);
   await view.locator('thead .o_list_record_selector input[type="checkbox"]').first().check();
@@ -906,12 +906,12 @@ When(/^(I |we )*select all (?:the )?(?:Odoo )?records$/, async function (pronoun
  *
  * Example #1: Then I should see 1 selected record
  * Example #2: And I should see 3 selected records
- * Example #3: Then we should see 15 selected Odoo records
+ * Example #3: Then we should see 15 selected records
  * Example #4: And I should see 0 selected records
  * Example #5: Then we should see 2 selected records
  *
  */
-Then(/^(I |we )*should see (\d+) selected (?:Odoo )?records?$/, async function (pronounCase, expected) {
+Then(/^(I |we )*should see (\d+) selected records?$/, async function (pronounCase, expected) {
   const scope = await activeScope(this.page);
   const box = scope.locator('.o_list_selection_box').first();
   if (Number(expected) === 0) {
@@ -938,12 +938,12 @@ Then(/^(I |we )*should see (\d+) selected (?:Odoo )?records?$/, async function (
  *
  * Example #1: When I choose "Delete" in the Actions menu
  * Example #2: When we choose "Archive" in the Actions menu
- * Example #3: And I choose "Duplicate" in the Odoo Actions menu
+ * Example #3: And I choose "Duplicate" in the Actions menu
  * Example #4: When I choose "Unarchive" in the actions menu
- * Example #5: And we choose "Export" in the Odoo actions menu
+ * Example #5: And we choose "Export" in the actions menu
  *
  */
-When(/^(I |we )*choose "([^"]*)" in the (?:Odoo )?[Aa]ctions menu$/, async function (pronounCase, name) {
+When(/^(I |we )*choose "([^"]*)" in the [Aa]ctions menu$/, async function (pronounCase, name) {
   const page = this.page;
   const scope = await activeScope(page);
   await settle(this);
@@ -981,12 +981,12 @@ When(/^(I |we )*choose "([^"]*)" in the (?:Odoo )?[Aa]ctions menu$/, async funct
  *
  * Example #1: Then I should see the "Mitchell Admin" group
  * Example #2: And I should see the "Sales Order" group
- * Example #3: Then we should see the "Quotation" Odoo group
+ * Example #3: Then we should see the "Quotation" group
  * Example #4: And I should not see the "Cancelled" group
- * Example #5: Then we should not see the "Marc Demo" Odoo group
+ * Example #5: Then we should not see the "Marc Demo" group
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?group$/, async function (pronounCase, notCase, name) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" group$/, async function (pronounCase, notCase, name) {
   const view = await requireView(this, 'list');
   await settle(this);
   const groups = view.locator('tr.o_group_header .o_group_name');
@@ -1006,11 +1006,11 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?group$/, async functio
  * Example #1: When I open the "Mitchell Admin" group
  * Example #2: When we open the "Sales Order" group
  * Example #3: And I close the "Quotation" group
- * Example #4: When I open the "Azure Interior" Odoo group
- * Example #5: And we close the "Mitchell Admin" Odoo group
+ * Example #4: When I open the "Azure Interior" group
+ * Example #5: And we close the "Mitchell Admin" group
  *
  */
-When(/^(I |we )*(open|close) the "([^"]*)" (?:Odoo )?group$/, async function (pronounCase, action, name) {
+When(/^(I |we )*(open|close) the "([^"]*)" group$/, async function (pronounCase, action, name) {
   const view = await requireView(this, 'list');
   await settle(this);
   const headers = view.locator('tr.o_group_header');
@@ -1039,12 +1039,12 @@ When(/^(I |we )*(open|close) the "([^"]*)" (?:Odoo )?group$/, async function (pr
  *
  * Example #1: Then the pager should read "1-15 / 15"
  * Example #2: And the pager should read "1-80 / 132"
- * Example #3: Then the Odoo pager should read "1 / 2"
+ * Example #3: Then the pager should read "1 / 2"
  * Example #4: And the pager should not read "1-80 / 80"
- * Example #5: Then the Odoo pager should not read "1 / 1"
+ * Example #5: Then the pager should not read "1 / 1"
  *
  */
-Then(/^the (?:Odoo )?pager should( not)* read "([^"]*)"$/, async function (notCase, expected) {
+Then(/^the pager should( not)* read "([^"]*)"$/, async function (notCase, expected) {
   const scope = await activeScope(this.page);
   await settle(this);
   const pager = scope.locator('.o_pager .o_pager_counter').first();
@@ -1075,10 +1075,10 @@ Then(/^the (?:Odoo )?pager should( not)* read "([^"]*)"$/, async function (notCa
  * Example #2: When we go to the previous page of records
  * Example #3: And I go to the next record
  * Example #4: When I go to the previous record
- * Example #5: And we go to the next page of Odoo records
+ * Example #5: And go to the next page of records
  *
  */
-When(/^(I |we )*go to the (next|previous) (?:page of (?:Odoo )?records|(?:Odoo )?record)$/, async function (pronounCase, direction) {
+When(/^(I |we )*go to the (next|previous) (?:page of records|record)$/, async function (pronounCase, direction) {
   const scope = await activeScope(this.page);
   await settle(this);
   const button = scope.locator(`.o_pager .o_pager_${direction}:visible`).first();
@@ -1108,10 +1108,10 @@ When(/^(I |we )*go to the (next|previous) (?:page of (?:Odoo )?records|(?:Odoo )
  * Example #2: And I should see the "Won" column
  * Example #3: Then we should see the "Qualified" kanban column
  * Example #4: And I should not see the "Archived" column
- * Example #5: Then we should not see the "Lost" Odoo kanban column
+ * Example #5: Then we should not see the "Lost" kanban column
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?(?:kanban )?column$/, async function (pronounCase, notCase, title) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" (?:kanban )?column$/, async function (pronounCase, notCase, title) {
   const view = await requireView(this, 'kanban');
   await settle(this);
   const titles = view.locator('.o_kanban_group .o_column_title');
@@ -1129,10 +1129,10 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" (?:Odoo )?(?:kanban )?column$/, 
  * Example #2: And I should see the "Info about services" card in the "New" column
  * Example #3: Then we should see the "Modern Open Space" card in the "Proposition" kanban column
  * Example #4: And I should not see the "Quote for 600 Chairs" card in the "Won" column
- * Example #5: Then we should not see the "Info about services" card in the "Qualified" Odoo column
+ * Example #5: Then we should not see the "Info about services" card in the "Qualified" column
  *
  */
-Then(/^(I |we )*should( not)* see the "([^"]*)" card in the "([^"]*)" (?:Odoo )?(?:kanban )?column$/, async function (pronounCase, notCase, text, title) {
+Then(/^(I |we )*should( not)* see the "([^"]*)" card in the "([^"]*)" (?:kanban )?column$/, async function (pronounCase, notCase, text, title) {
   const column = await findColumn(this, title);
   const cards = column.locator('.o_kanban_record:not(.o_kanban_ghost)');
   await assertPresence(cards.filter({ hasText: textPattern(text) }).first(), notCase, `a card showing "${text}" in the "${title}" column`, {
@@ -1148,10 +1148,10 @@ Then(/^(I |we )*should( not)* see the "([^"]*)" card in the "([^"]*)" (?:Odoo )?
  * Example #2: And the "Won" column should have 1 card
  * Example #3: Then the "Qualified" kanban column should have 3 cards
  * Example #4: And the "Proposition" column should have 0 cards
- * Example #5: Then the "New" Odoo column should have 4 cards
+ * Example #5: Then the "New" column should have 4 cards
  *
  */
-Then(/^the "([^"]*)" (?:Odoo )?(?:kanban )?column should have (\d+) cards?$/, async function (title, expected) {
+Then(/^the "([^"]*)" (?:kanban )?column should have (\d+) cards?$/, async function (title, expected) {
   const column = await findColumn(this, title);
   const cards = column.locator('.o_kanban_record:not(.o_kanban_ghost)');
   const wanted = Number(expected);
@@ -1179,10 +1179,10 @@ Then(/^the "([^"]*)" (?:Odoo )?(?:kanban )?column should have (\d+) cards?$/, as
  * Example #2: When we drag the "Info about services" card to the "Qualified" column
  * Example #3: And I move the "Modern Open Space" card to the "Won" column
  * Example #4: When I drag the "Quote for 12 Tables" card to the "New" kanban column
- * Example #5: And we move the "Global Solutions: Furnitures" card to the "Proposition" Odoo column
+ * Example #5: And we move the "Global Solutions: Furnitures" card to the "Proposition" column
  *
  */
-When(/^(I |we )*(?:drag|move) the "([^"]*)" card to the "([^"]*)" (?:Odoo )?(?:kanban )?column$/, async function (pronounCase, text, title) {
+When(/^(I |we )*(?:drag|move) the "([^"]*)" card to the "([^"]*)" (?:kanban )?column$/, async function (pronounCase, text, title) {
   const page = this.page;
   const view = await requireView(this, 'kanban');
   await settle(this);

@@ -1,6 +1,6 @@
 # Steps
 
-Every step of `@webship-js/odoo-steps`, written from the step definitions by `npm run docs:steps`. Each step is shown by its first example; the comment above its definition gives four more and names the markup the step relies on. The word "Odoo" is optional in every sentence, and every assertion takes `not`.
+Every step of `@webship-js/odoo-steps`, written from the step definitions by `npm run docs:steps`. Each step is shown by its first example; the comment above its definition gives four more and names the markup the step relies on. Every assertion takes `not`.
 
 ## Sessions
 
@@ -8,12 +8,12 @@ Every step of `@webship-js/odoo-steps`, written from the step definitions by `np
 
 | Step | What it does |
 | --- | --- |
-| `Given I am on the Odoo login page` | Navigate to the login screen at `/web/login`. |
-| `Then I should see the Odoo login form` | Assert the login form is, or is not, visible. |
-| `When I log in to Odoo as "admin" with password "secret"` | Fill and submit the login form with the given login and password, for scenarios where the credentials are the subject (a wrong password, a disabled account). |
+| `Given I am on the login page` | Navigate to the login screen at `/web/login`. |
+| `Then I should see the login form` | Assert the login form is, or is not, visible. |
+| `When I log in as "admin" with password "secret"` | Fill and submit the login form with the given login and password, for scenarios where the credentials are the subject (a wrong password, a disabled account). |
 | `Given I am a logged in user with the "admin" user` | Log in as a user of the registry in cucumber.js (`worldParameters.users`), so no password appears in a feature file. |
 | `Given I am not logged in` | End any session and land on the login screen as a visitor. |
-| `Then I should see an Odoo login error` | Assert the login screen is, or is not, showing an error, optionally with a text. |
+| `Then I should see an login error` | Assert the login screen is, or is not, showing an error, optionally with a text. |
 | `When I log out` | Log out the way a user does. |
 | `Then I should be logged in` | Assert the browser holds, or does not hold, a session, as the server reports it (`/web/session/get_session_info`). |
 | `Then I should be logged in as "admin"` | Assert the session belongs, or does not belong, to the given user. |
@@ -108,25 +108,25 @@ Every step of `@webship-js/odoo-steps`, written from the step definitions by `np
 
 | Step | What it does |
 | --- | --- |
-| `Then I should be on an Odoo website page` | Assert the current page was, or was not, rendered by the Odoo Website builder. |
-| `Then I should see the Odoo top menu` | Assert the Website top menu (main navigation) is, or is not, visible. |
-| `Then I should see the Odoo footer` | Assert the Website footer is, or is not, visible. |
-| `Then I should be on the Odoo blog page` | Assert the current page is, or is not, the Blog index/listing template. |
-| `Then I should be on an Odoo blog post page` | Assert the current page is, or is not, a single blog post template. |
-| `Then I should see the Odoo blog post titled "Customer Reviews"` | Assert the blog post on screen has, or does not have, the given title. |
-| `Then I should be on the Odoo shop page` | Assert the current page is, or is not, the eCommerce shop/catalog template. |
-| `Then I should be on an Odoo product page` | Assert the current page is, or is not, an eCommerce product page. |
-| `When I open the first product in the Odoo shop` | Open a product from the shop grid on screen. |
-| `When I search the Odoo shop for "mug"` | Submit the shop's search form with the given term. |
-| `Then I should see Odoo shop search results for "desk"` | Assert the shop search returned, or did not return, products for the given term. |
+| `Then I should be on a website page` | Assert the current page was, or was not, rendered by the Odoo Website builder. |
+| `Then I should see the top menu` | Assert the Website top menu (main navigation) is, or is not, visible. |
+| `Then I should see the footer` | Assert the Website footer is, or is not, visible. |
+| `Then I should be on the blog page` | Assert the current page is, or is not, the Blog index/listing template. |
+| `Then I should be on an blog post page` | Assert the current page is, or is not, a single blog post template. |
+| `Then I should see the blog post titled "Customer Reviews"` | Assert the blog post on screen has, or does not have, the given title. |
+| `Then I should be on the shop page` | Assert the current page is, or is not, the eCommerce shop/catalog template. |
+| `Then I should be on an product page` | Assert the current page is, or is not, an eCommerce product page. |
+| `When I open the first product in the shop` | Open a product from the shop grid on screen. |
+| `When I search the shop for "mug"` | Submit the shop's search form with the given term. |
+| `Then I should see shop search results for "desk"` | Assert the shop search returned, or did not return, products for the given term. |
 | `Then I should see the "Customizable Desk" product in the shop` | Assert the shop grid lists, or does not list, a product by its name (`#products_grid .o_wsale_products_item_title`). |
-| `When I add the product to the Odoo cart` | Add the product on screen to the cart. |
-| `Then I should see "1" item in the Odoo cart` | Assert the cart badge shows, or does not show, the given item count. |
-| `Then I should be on the Odoo events page` | Assert the current page is, or is not, the Events index/listing template. |
-| `Then I should be on the Odoo jobs page` | Assert the current page is, or is not, the Jobs (recruitment) listing template. |
-| `Then I should see Odoo job openings` | Assert at least one job opening link is, or none is, visible on the Jobs page. |
-| `Given I am on the Odoo contact us page` | Navigate to the "Contact us" page at `/contactus` and check that the site serves it. |
-| `Then I should see the Odoo contact us form` | Assert the "Contact us" form is, or is not, visible. |
+| `When I add the product to the cart` | Add the product on screen to the cart. |
+| `Then I should see "1" item in the cart` | Assert the cart badge shows, or does not show, the given item count. |
+| `Then I should be on the events page` | Assert the current page is, or is not, the Events index/listing template. |
+| `Then I should be on the jobs page` | Assert the current page is, or is not, the Jobs (recruitment) listing template. |
+| `Then I should see job openings` | Assert at least one job opening link is, or none is, visible on the Jobs page. |
+| `Given I am on the contact us page` | Navigate to the "Contact us" page at `/contactus` and check that the site serves it. |
+| `Then I should see the contact us form` | Assert the "Contact us" form is, or is not, visible. |
 | `When I fill in the contact form with:` | Fill the contact form from a table. |
 | `When I submit the contact form` | Submit the contact form with its button (`.s_website_form_send`) and wait for the answer of the site. |
 | `Then I should see the contact form confirmation` | Assert the site confirmed, or did not confirm, the contact form. |
@@ -136,6 +136,6 @@ Every step of `@webship-js/odoo-steps`, written from the step definitions by `np
 | `Then I should see the website editor` | Assert the website editor is, or is not, open. |
 | `Then I should see the "Text" building block` | Assert the website editor offers, or does not offer, a building block, by its name in the "Blocks" tab of the editor panel (`#oe_snippets .oe_snippet`). |
 | `When I save the website editor` | Leave the website editor with its "Save" or its "Discard" button and wait for the editor to close. |
-| `Then I should be on the Odoo 404 page` | Assert the current page is, or is not, the core 404 template, by checking the page heading for "404" (rendered by `addons/http_routing`'s `http_routing.404` template on every Odoo site). |
+| `Then I should be on the 404 page` | Assert the current page is, or is not, the core 404 template, by checking the page heading for "404" (rendered by `addons/http_routing`'s `http_routing.404` template on every Odoo site). |
 
 108 steps.

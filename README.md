@@ -26,7 +26,7 @@ Every step is proven against a real Odoo 17.0 Community site with demo data, bui
 
 The steps wait on Odoo's own signals: the data requests of the web client and its "Loading" indicator. No step waits for a fixed time. A step that fails says what it expected, what it found and what to check, and lists what the page offers (the apps of the menu, the labels of the form, the buttons of the dialog).
 
-The word "Odoo" is optional in every sentence: `When I open the "CRM" app` and `When I open the "CRM" Odoo app` are the same step. Every assertion takes `not`.
+No step phrase names the platform: a step reads `When I open the "CRM" app`, `When I save the record`. Every assertion takes `not`.
 
 ## Requirements
 
