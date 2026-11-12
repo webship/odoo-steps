@@ -136,8 +136,9 @@ Then(/^(I |we )*should( not)* be on (?:an?|the) (?:Odoo )?(?:single )?blog post 
 
 /**
  * Assert the blog post on screen has, or does not have, the given title.
- * Reads `.o_wblog_post_title`, the single-post view's title element, and
- * waits for the text to be there.
+ * Reads `#o_wblog_post_name`, the heading of the single-post view (the
+ * subtitle under it is not part of the title), and waits for the text to be
+ * there.
  *
  * Example #1: Then I should see the Odoo blog post titled "Customer Reviews"
  * Example #2: And I should see the blog post titled "Employee Testimonials"
@@ -147,8 +148,8 @@ Then(/^(I |we )*should( not)* be on (?:an?|the) (?:Odoo )?(?:single )?blog post 
  *
  */
 Then(/^(I |we )*should( not)* see the (?:Odoo )?blog post titled "([^"]*)?"$/, async function (pronounCase, notCase, expectedTitle) {
-  const title = this.page.locator('.o_wblog_post_title').first();
-  await assertPresence(title, undefined, 'the blog post title (".o_wblog_post_title")', {
+  const title = this.page.locator('#o_wblog_post_name, .o_wblog_post_title h1').first();
+  await assertPresence(title, undefined, 'the blog post title ("#o_wblog_post_name")', {
     attached: true,
     hint: 'Open a single blog post first.',
   });

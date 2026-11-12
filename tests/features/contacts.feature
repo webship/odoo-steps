@@ -49,6 +49,13 @@ Feature: Odoo contacts
     And I set the "Salesperson" field to "Mitchell Admin"
     And I save the record
     Then the "Salesperson" field should be "Mitchell Admin"
+    When I set the "Salesperson" field to ""
+    And I save the record
+    Then the "Salesperson" field should be ""
+    When I open the "Internal Notes" tab
+    And I set the "comment" field to "Reviewed by the Webship suite"
+    And I save the record
+    Then the "comment" field should show "Reviewed by the Webship suite"
     When I choose "Delete" in the Actions menu
     Then I should see the "Bye-bye, record!" dialog
     And I should see "Ready to make your record disappear into thin air?" in the dialog

@@ -49,6 +49,8 @@ Feature: Odoo sales quotation
     And I search the records for "S00007"
     And I open the "S00007" record
     Then the status should be "Sales Order"
+    And the "Customer" field should be read-only
+    And the "Payment Terms" field should not be read-only
     When I click the "Cancel" button in the form
     Then I should see a dialog
     And I should see the "Cancel Sales Order" dialog
