@@ -24,3 +24,12 @@ Feature: Odoo website editor
   Scenario: A user without a website editor group has no edit button
     Given I am a logged in user with the "salesperson" user
     Then I should not be able to edit the website
+
+  Scenario: A visitor cannot edit the website
+    Given I am on the homepage
+    Then I should not be able to edit the website
+
+  Scenario: A portal user cannot edit the website
+    Given I am a logged in user with the "portal" user
+    Then I should not be able to edit the website
+    And I should not be able to edit the website on "/contactus"

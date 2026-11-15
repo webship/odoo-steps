@@ -647,18 +647,23 @@ const EDITOR_PANEL = '#oe_snippets.o_loaded';
 
 /**
  * Open a page in the website preview of the web client (`/@/<path>`), where
- * a website editor finds the "Edit" button.
+ * a website editor finds the "Edit" button. A visitor and a portal user are
+ * not shown the preview: the same address gives them the public page. With
+ * `optional`, the function answers `false` for them instead of failing.
  *
  * @param {object} world
  * @param {string} path
- * @returns {Promise<void>}
+ * @param {{optional?: boolean}} [options]
+ * @returns {Promise<boolean>} Whether the preview is shown.
  */
-async function openWebsitePreview(world, path) {
+async function openWebsitePreview(world, path, { optional = false } = {}) {
   const page = world.page;
   const target = `/@/${String(path || '/').replace(/^\/+/, '')}`;
   await navigate(world, target);
+  const preview = page.locator('.o_website_preview iframe.o_iframe').first();
+  const publicPage = page.locator('body:not(.o_web_client) #wrapwrap').first();
   try {
-    await page.locator('.o_website_preview iframe.o_iframe').first().waitFor({ state: 'visible', timeout: WAIT_TIMEOUT });
+    await (optional ? preview.or(publicPage).first() : preview).waitFor({ state: 'visible', timeout: WAIT_TIMEOUT });
   } catch (error) {
     throw friendly({
       message: 'Expected the website preview of the web client.',
@@ -666,15 +671,18 @@ async function openWebsitePreview(world, path) {
       hint: 'The preview is shown to an internal user; log in first ("Given I am a logged in user with the "admin" user").',
     });
   }
+  if (optional && !(await preview.isVisible().catch(() => false))) return false;
   await settle(world);
+  return true;
 }
 
 /**
  * Assert the current user can, or cannot, edit the website: the website
  * preview of the web client shows the "Edit" button
  * (`.o_edit_website_container`) to the users of the "Restricted Editor" and
- * "Editor and Designer" groups. With `on "<path>"` the check runs on that
- * page; the front page otherwise.
+ * "Editor and Designer" groups. A visitor and a portal user are not shown
+ * the preview at all, which is a "cannot". With `on "<path>"` the check runs
+ * on that page; the front page otherwise.
  *
  * Example #1: Then I should be able to edit the website
  * Example #2: And I should not be able to edit the website
@@ -684,7 +692,16 @@ async function openWebsitePreview(world, path) {
  *
  */
 Then(/^(I |we )*should( not)* be able to edit the website(?: on "([^"]*)")?$/, async function (pronounCase, notCase, path) {
-  await openWebsitePreview(this, path || '/');
+  const shown = await openWebsitePreview(this, path || '/', { optional: true });
+  if (!shown) {
+    // No preview at all: a visitor or a portal user, who gets the public page.
+    if (notCase) return;
+    throw friendly({
+      message: 'Expected the "Edit" button of the website preview, but this user is not shown the preview.',
+      cause: `the page is the public page ${this.page.url()}`,
+      hint: 'The preview and its "Edit" button are for the internal users of the website editor groups; a visitor and a portal user get the public page. Log in first ("Given I am a logged in user with the "admin" user").',
+    });
+  }
   await assertPresence(this.page.locator('.o_menu_systray .o_edit_website_container a').first(), notCase, 'the "Edit" button of the website preview (".o_edit_website_container")', {
     timeout: SHORT_TIMEOUT,
     hint: 'The button is shown to the users of the website editor groups (Website: Restricted Editor, Editor and Designer).',
