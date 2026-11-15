@@ -8,10 +8,10 @@ Every step of `@webship-js/odoo-steps`, written from the step definitions by `np
 
 | Step | What it does |
 | --- | --- |
+| `Given I am a logged in user with the "admin" user` | Log in as a user of the registry in cucumber.js (`worldParameters.users`), so no password appears in a feature file. |
+| `When I log in as "admin" with password "secret"` | Fill and submit the login form with the given login and password, for scenarios where the credentials are the subject (a wrong password, a disabled account). |
 | `Given I am on the login page` | Navigate to the login screen at `/web/login`. |
 | `Then I should see the login form` | Assert the login form is, or is not, visible. |
-| `When I log in as "admin" with password "secret"` | Fill and submit the login form with the given login and password, for scenarios where the credentials are the subject (a wrong password, a disabled account). |
-| `Given I am a logged in user with the "admin" user` | Log in as a user of the registry in cucumber.js (`worldParameters.users`), so no password appears in a feature file. |
 | `Given I am not logged in` | End any session and land on the login screen as a visitor. |
 | `Then I should see an login error` | Assert the login screen is, or is not, showing an error, optionally with a text. |
 | `When I log out` | Log out the way a user does. |

@@ -14,7 +14,7 @@ Every step is proven against a real Odoo 17.0 Community site with demo data, bui
 
 | Area | Steps | File |
 | --- | --- | --- |
-| Sessions | the login screen, logging in as a user of the registry, logging out from the user menu, who is logged in, the web client and the portal, the user menu | `odoo-session.steps.js` |
+| Sessions | logging in as a user of the registry or with a login and a password, the login screen, logging out from the user menu, who is logged in, the web client and the portal, the user menu | `odoo-session.steps.js` |
 | Apps and menus | the apps menu, opening an app, a menu path (`Orders > Quotations`), an action by its external ID, the breadcrumb, the view switcher | `odoo-webclient.steps.js` |
 | Search view | search, search in a named field, filters, grouping, facets, clearing the search | `odoo-webclient.steps.js` |
 | List view | records, opening a record, counting, selecting, groups, the pager, the Actions menu | `odoo-webclient.steps.js` |
