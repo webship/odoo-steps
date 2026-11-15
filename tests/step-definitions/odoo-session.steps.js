@@ -1,8 +1,9 @@
 'use strict';
 
-// Session steps for Odoo: the login screen (`/web/login`), the users registry
-// of cucumber.js, the user menu of the web client and of the website, logging
-// out, and what the server says about the session.
+// Session steps for Odoo: logging in with the users registry of cucumber.js
+// or with a login and a password, the login screen (`/web/login`), the user
+// menu of the web client and of the website, logging out, and what the server
+// says about the session.
 //
 // Accounts are configuration. They are created once on the site under test
 // (scripts/build-odoo.sh does it for this pack's own suite) and named in
@@ -65,6 +66,46 @@ async function openUserMenu(world) {
 }
 
 /**
+ * Log in as a user of the registry in cucumber.js (`worldParameters.users`),
+ * so no password appears in a feature file. Each handle names one account:
+ * `{ admin: { username: 'admin', password: process.env.ODOO_ADMIN_PASSWORD } }`.
+ * The step starts a new session, opens the login screen, submits the form and
+ * waits for the page the user lands on: the web client for an internal user,
+ * the portal for a portal user. A refused login fails here, with the message
+ * the login form shows.
+ *
+ * Example #1: Given I am a logged in user with the "admin" user
+ * Example #2: Given I am a logged in user with the username "admin"
+ * Example #3: Given we are a logged in user with "portal"
+ * Example #4: And a logged in user with the "salesperson" user
+ * Example #5: Given I am a logged in user with the username "accountant" user
+ *
+ */
+Given(/^(I am |we are )*a logged in user with( the)*( username)* "([^"]*)?"( user)*$/, async function (pronounCase, theCase, usernameCase, handle, userCase) {
+  await loginAs(this, handle);
+});
+
+/**
+ * Fill and submit the login form with the given login and password, for
+ * scenarios where the credentials are the subject (a wrong password, a
+ * disabled account). The login screen must be open already. For everything
+ * else use the users registry: `Given I am a logged in user with the "admin"
+ * user`.
+ *
+ * Example #1: When I log in as "admin" with password "secret"
+ * Example #2: When we log in as "demo@example.com" with password "p@ssw0rd"
+ * Example #3: And I sign in as "admin" with password "secret"
+ * Example #4: When we sign-in as "reviewer" with password "hunter2"
+ * Example #5: And log in as "portal_user" with password "letmein"
+ *
+ */
+When(/^(I |we )*(?:log in|sign[- ]?in) as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
+  await submitLogin(this, username, password);
+  await this.page.locator(`.o_main_navbar, #wrapwrap, ${LOGIN_FORM}`).first().waitFor({ state: 'attached', timeout: WAIT_TIMEOUT }).catch(() => {});
+  await settle(this, budget(this));
+});
+
+/**
  * Navigate to the login screen at `/web/login`. The screen ships with the
  * base "web" module, so every Odoo site has it.
  *
@@ -109,46 +150,6 @@ Then(/^(I |we )*should( not)* see the (?:sign[- ]?in|login) form$/, async functi
   await assertPresence(this.page.locator(`${LOGIN_FORM} #login`), undefined, 'the login field ("#login")', { hint, timeout: SHORT_TIMEOUT });
   await assertPresence(this.page.locator(`${LOGIN_FORM} #password`), undefined, 'the password field ("#password")', { hint, timeout: SHORT_TIMEOUT });
   await assertPresence(this.page.locator(`${LOGIN_FORM} button[type="submit"]`).first(), undefined, 'the submit button of the login form', { hint, timeout: SHORT_TIMEOUT });
-});
-
-/**
- * Fill and submit the login form with the given login and password, for
- * scenarios where the credentials are the subject (a wrong password, a
- * disabled account). The login screen must be open already. For everything
- * else use the users registry: `Given I am a logged in user with the "admin"
- * user`.
- *
- * Example #1: When I log in as "admin" with password "secret"
- * Example #2: When we log in as "demo@example.com" with password "p@ssw0rd"
- * Example #3: And I sign in as "admin" with password "secret"
- * Example #4: When we sign-in as "reviewer" with password "hunter2"
- * Example #5: And log in as "portal_user" with password "letmein"
- *
- */
-When(/^(I |we )*(?:log in|sign[- ]?in) as "([^"]*)?" with password "([^"]*)?"$/, async function (pronounCase, username, password) {
-  await submitLogin(this, username, password);
-  await this.page.locator(`.o_main_navbar, #wrapwrap, ${LOGIN_FORM}`).first().waitFor({ state: 'attached', timeout: WAIT_TIMEOUT }).catch(() => {});
-  await settle(this, budget(this));
-});
-
-/**
- * Log in as a user of the registry in cucumber.js (`worldParameters.users`),
- * so no password appears in a feature file. Each handle names one account:
- * `{ admin: { username: 'admin', password: process.env.ODOO_ADMIN_PASSWORD } }`.
- * The step starts a new session, opens the login screen, submits the form and
- * waits for the page the user lands on: the web client for an internal user,
- * the portal for a portal user. A refused login fails here, with the message
- * the login form shows.
- *
- * Example #1: Given I am a logged in user with the "admin" user
- * Example #2: Given I am a logged in user with the username "admin"
- * Example #3: Given we are a logged in user with "portal"
- * Example #4: And a logged in user with the "salesperson" user
- * Example #5: Given I am a logged in user with the username "accountant" user
- *
- */
-Given(/^(I am |we are )*a logged in user with( the)*( username)* "([^"]*)?"( user)*$/, async function (pronounCase, theCase, usernameCase, handle, userCase) {
-  await loginAs(this, handle);
 });
 
 /**
