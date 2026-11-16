@@ -7,6 +7,13 @@ on:
     branches: ['2.0.x']
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   FORCE_COLOR: '1'
 
@@ -67,7 +74,8 @@ jobs:
         with:
           name: cucumber-report
           path: |
-            tests/reports/cucumber_report.json
-            tests/reports/cucumber_report.html
+            tests/reports/
             screenshots/
+            videos/
           retention-days: 14
+          if-no-files-found: ignore
