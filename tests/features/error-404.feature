@@ -4,6 +4,6 @@ Feature: Odoo 404 page
   So that I know the page was not found rather than seeing a broken page
 
   Scenario: An unknown URL renders the Odoo 404 template
-    Given I am on "/this-page-does-not-exist-odoo-steps"
+    Given I am on "/this-page-does-not-exist"
     Then I should be on the 404 page
     And the response status code should be 404
