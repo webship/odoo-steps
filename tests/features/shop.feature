@@ -6,6 +6,7 @@ Feature: Odoo shop
   Scenario: Shop index renders the product grid
     Given I am on "/shop"
     Then I should be on the shop index
+    But I should not be on a product page
     And the response status code should be 200
 
   Scenario: Shop search returns matching results
@@ -24,6 +25,7 @@ Feature: Odoo shop
     Given I am on "/shop"
     When I open the first product in the shop
     Then I should be on an product page
+    But I should not be on the shop index
     And the response status code should be 200
 
   Scenario: Adding a product updates the cart badge
@@ -31,3 +33,4 @@ Feature: Odoo shop
     When I open the first product in the shop
     And I add the product to the cart
     Then I should see "1" item in the cart
+    But I should not see "2" items in the cart

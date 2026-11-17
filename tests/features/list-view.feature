@@ -10,7 +10,10 @@ Feature: Odoo list view
   Scenario: The list shows the records and the pager counts them
     Then I should see the list view
     And I should see the "S00007" record
+    And I should not see the chatter
     And the pager should not read "1-80 / 80"
+    When I search the records for "S00007"
+    Then the pager should read "1-1 / 1"
 
   Scenario: A record opens in its form view and the pager walks the records
     When I search the records for "Gemini Furniture" in "Customer"

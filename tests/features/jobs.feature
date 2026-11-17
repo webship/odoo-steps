@@ -6,5 +6,6 @@ Feature: Odoo jobs
   Scenario: Jobs page renders open positions
     Given I am on "/jobs"
     Then I should be on the jobs page
+    But I should not be on the events page
     And I should see job openings
     And the response status code should be 200

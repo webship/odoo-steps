@@ -6,6 +6,7 @@ Feature: Odoo login
   Scenario: The login screen exposes login, password and submit
     Given I am on the login page
      Then I should see the login form
+      But I should not see a login error
       And the response status code should be 200
 
   @critical
@@ -23,5 +24,6 @@ Feature: Odoo login
   Scenario: A configured user starts an authenticated session and can end it
     Given I am a logged in user with the "admin" user
     Then the path should not be "/web/login"
+    And I should not see the login form
     When I am not logged in
     Then I should see the login form

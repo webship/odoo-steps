@@ -55,6 +55,8 @@ Feature: Odoo sales quotation
     Then I should see a dialog
     And I should see the "Cancel Sales Order" dialog
     And I should not see the "Confirmation" dialog
+    And I should see "Are you sure you want to cancel this order?" in the dialog
+    But I should not see "Ready to make your record disappear into thin air?" in the dialog
     When I close the dialog
     Then I should not see a dialog
     And the status should be "Sales Order"

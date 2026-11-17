@@ -48,7 +48,7 @@ const {
 Then(/^(I |we )*should( not)* be on a website page$/, async function (pronounCase, notCase) {
   await assertPresence(this.page.locator('#wrapwrap'), notCase, 'the Website wrapper ("#wrapwrap")', {
     attached: true,
-    hint: 'Every page the Odoo Website builder renders carries #wrapwrap; the backend webclient (/web) and the login screen do not.',
+    hint: 'Every page the Website app renders carries #wrapwrap, the login screen too once the app is installed; the web client (/web) does not.',
   });
 });
 
