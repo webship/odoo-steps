@@ -144,13 +144,15 @@ Scripts:
 | `npm test` | The full suite |
 | `npm run test:dry` | `--dry-run`: no undefined and no ambiguous step |
 | `npm run test:examples` | No browser: every step has five `Example #n:` lines that match its own definition and no other, and every feature step resolves to one definition |
+| `npm run test:paths` | No browser: a feature or a scenario named on the command line runs alone, and naming none runs the whole suite |
 | `npm run docs:steps` | Writes [STEPS.md](STEPS.md) from the step definitions; `npm run docs:steps:check` fails when it is out of date |
 | `npm run test:headed` | The suite in a visible browser |
 | `npm run test:chromium`, `test:firefox`, `test:webkit` | The suite in one browser |
 
 Settings read from the environment:
 
-- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs some feature files; `CUCUMBER_TAGS=@critical npm test` runs the scenarios with a tag (the default run leaves `@wip` out).
+- `npx cucumber-js tests/features/login.feature` runs one feature and `npx cucumber-js tests/features/login.feature:<line>` one scenario (the line of its `Scenario:`); the paths of `cucumber.js` are left out when the command line names any.
+- `FEATURES=tests/features/a.feature,tests/features/b.feature npm test` runs some feature files too; `CUCUMBER_TAGS=@critical npm test` runs the scenarios with a tag (the default run leaves `@wip` out).
 - `ODOO_<HANDLE>_USER` and `ODOO_<HANDLE>_PASSWORD` set the login and the password of a registry account, for example `ODOO_ADMIN_PASSWORD`.
 - `ODOO_DATABASE` names the database to log in to on a server that holds several.
 - `WEBSHIP_VIDEO=on-failure` records the browser; `WEBSHIP_JS_ERROR_MODE=fail` fails a scenario on a JavaScript error (`@js-off` silences one scenario).

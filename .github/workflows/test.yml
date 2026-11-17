@@ -53,6 +53,11 @@ jobs:
       - name: Check the step examples and feature steps against the definitions
         run: npm run test:examples
 
+
+      - name: Check that a feature named on the command line runs alone
+
+        run: npm run test:paths
+
       - name: Check that STEPS.md lists the steps as they are defined
         run: npm run docs:steps:check
 
