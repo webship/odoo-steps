@@ -8,6 +8,14 @@ Feature: Odoo blog
      Then I should be on the blog index
       And the response status code should be 200
 
+  Scenario: The blog index and the page of one blog are not a post page
+    Given I am on "/blog"
+     Then I should be on the blog index
+      But I should not be on a blog post page
+    Given I am on "/blog/travel-1"
+     Then I should be on the blog index
+      But I should not be on a blog post page
+
   Scenario: A blog post renders the single-post template
     Given I am on "/blog"
      When I click on the element ".o_wblog_post a"
@@ -17,5 +25,7 @@ Feature: Odoo blog
   Scenario: A blog post shows its title
     Given I am on "/blog/travel-1/sierra-tarahumara-1"
      Then I should be on an blog post page
+      But I should not be on the blog index
       And I should see the blog post titled "Sierra Tarahumara"
       And I should not see the blog post titled "An exciting mix"
+      And I should not see the blog post titled "How to choose the right hotel"

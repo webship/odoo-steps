@@ -111,8 +111,10 @@ Then(/^(I |we )*should( not)* be on the blog (?:index|page|listing page)$/, asyn
 
 /**
  * Assert the current page is, or is not, a single blog post template.
- * Matches `.o_wblog_post_title`, an element only the single-post view renders
- * (the index view's post teaser cards do not include it).
+ * Matches `#o_wblog_post_top`, the header only the single-post view renders.
+ * The blog index and the page of one blog show their newest post in a cover
+ * at the top with the same title classes (`.o_wblog_post_title`,
+ * `#o_wblog_post_name`), so those do not tell a post from a list of posts.
  *
  * Example #1: Then I should be on an blog post page
  * Example #2: And I should be on a blog post page
@@ -122,19 +124,19 @@ Then(/^(I |we )*should( not)* be on the blog (?:index|page|listing page)$/, asyn
  *
  */
 Then(/^(I |we )*should( not)* be on (?:an?|the) (?:single )?blog post page$/, async function (pronounCase, notCase) {
-  // .first(): the single-post template can also render a "related posts"
-  // teaser section further down the page reusing the same title class.
-  await assertPresence(this.page.locator('.o_wblog_post_title').first(), notCase, 'the single blog post template (".o_wblog_post_title")', {
+  await assertPresence(this.page.locator('#o_wblog_post_top').first(), notCase, 'the single blog post template ("#o_wblog_post_top")', {
     attached: true,
-    hint: 'Open a post from the blog index first; the index itself renders teaser cards without this title element.',
+    hint: 'Open a post from the blog index first. The index shows its newest post in a cover at the top, which is not a post page.',
   });
 });
 
 /**
  * Assert the blog post on screen has, or does not have, the given title.
- * Reads `#o_wblog_post_name`, the heading of the single-post view (the
- * subtitle under it is not part of the title), and waits for the text to be
- * there.
+ * Reads `#o_wblog_post_name` in `#o_wblog_post_top`, the heading of the
+ * single-post view (the subtitle under it is not part of the title; the cover
+ * of the next post at the bottom of the page and the newest post the blog
+ * index shows at its top carry the same id and are not read), and waits for
+ * the text to be there.
  *
  * Example #1: Then I should see the blog post titled "Customer Reviews"
  * Example #2: And I should see the blog post titled "Employee Testimonials"
@@ -144,10 +146,10 @@ Then(/^(I |we )*should( not)* be on (?:an?|the) (?:single )?blog post page$/, as
  *
  */
 Then(/^(I |we )*should( not)* see the blog post titled "([^"]*)?"$/, async function (pronounCase, notCase, expectedTitle) {
-  const title = this.page.locator('#o_wblog_post_name, .o_wblog_post_title h1').first();
-  await assertPresence(title, undefined, 'the blog post title ("#o_wblog_post_name")', {
+  const title = this.page.locator('#o_wblog_post_top #o_wblog_post_name, #o_wblog_post_top .o_wblog_post_title h1').first();
+  await assertPresence(title, undefined, 'the title of a single blog post ("#o_wblog_post_top #o_wblog_post_name")', {
     attached: true,
-    hint: 'Open a single blog post first.',
+    hint: 'Open a single blog post first; the newest post the blog index shows in its cover is not read.',
   });
   await assertText(title, expectedTitle, notCase, 'the blog post title', {
     hint: 'Text is matched as a substring, whitespace-collapsed but case-sensitive.',
