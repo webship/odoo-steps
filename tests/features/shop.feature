@@ -34,3 +34,20 @@ Feature: Odoo shop
     And I add the product to the cart
     Then I should see "1" item in the cart
     But I should not see "2" items in the cart
+
+  # Adding to the cart opens an order for the visitor (a quotation of the
+  # archived "Public user" contact, from the website). The administrator
+  # deletes the orders of that contact, so a run leaves no cart behind.
+  Scenario: The order a visitor's cart opened is removed in the back office
+    Given I am a logged in user with the "admin" user
+    When I open the "website_sale.action_orders_ecommerce" action
+    And I remove the "Confirmed" search facet
+    And I group the records by "Customer"
+    Then I should see the "Public user" group
+    When I open the "Public user" group
+    And I select all records
+    And I choose "Delete" in the Actions menu
+    And I confirm the dialog
+    Then I should not see a dialog
+    # The list keeps the emptied group open until it is grouped again.
+    And I should see "Public user (0)"
