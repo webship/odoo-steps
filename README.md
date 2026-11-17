@@ -156,6 +156,20 @@ Settings read from the environment:
 - `WEBSHIP_VIDEO=on-failure` records the browser; `WEBSHIP_JS_ERROR_MODE=fail` fails a scenario on a JavaScript error (`@js-off` silences one scenario).
 - `WEBSHIP_STEP_TIMEOUT=<milliseconds>` changes the step timeout of webship-js (45 seconds); a `timeout` key in `cucumber.js` does not.
 
+## Test users
+
+The accounts this repository's suite logs in as, exactly as `cucumber.js` lists them in `worldParameters.users` (the default values; `ODOO_<HANDLE>_USER` and `ODOO_<HANDLE>_PASSWORD` replace them, for example `ODOO_ADMIN_PASSWORD`). [`scripts/build-odoo.sh`](scripts/build-odoo.sh) creates them on the local test site, and CI does the same on the runner: the database's own `admin`, and [`scripts/odoo-setup.py`](scripts/odoo-setup.py) the four others with the groups of the table above. They are placeholder credentials of that throwaway site, not of any real one.
+
+```json
+{
+  "admin": { "username": "admin", "password": "admin" },
+  "salesperson": { "username": "salesperson", "password": "salesperson" },
+  "accountant": { "username": "accountant", "password": "accountant" },
+  "employee": { "username": "employee", "password": "employee" },
+  "portal": { "username": "portal", "password": "portal" }
+}
+```
+
 ## Limits
 
 - Proven on Odoo 17.0 Community, in English. Odoo Enterprise shows its apps on a home screen instead of a menu; the app steps look for both, and only the Community menu is proven by this suite.
