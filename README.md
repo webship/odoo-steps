@@ -30,6 +30,104 @@ The steps wait on Odoo's own signals: the data requests of the web client and it
 
 No step phrase names the platform: a step reads `When I open the "CRM" app`, `When I save the record`. Every assertion takes `not`.
 
+## From nothing to a green run
+
+What the machine needs: Docker, [DDEV](https://ddev.com), git, and Node.js 20 or later with npm. Odoo and PostgreSQL run in DDEV's containers (the `odoo:17.0` and `postgres:15-alpine` images, about 2.2 GB).
+
+**1. The Odoo site.** The repository's own DDEV project (the one CI runs) starts Odoo 17.0 Community and PostgreSQL, and its build script installs the apps with Odoo's demo data and creates the accounts of [Test users](#test-users); it takes a minute or two once the images are on the machine.
+
+```bash
+git clone https://github.com/webship/odoo-steps.git
+cd odoo-steps
+ddev start
+bash scripts/build-odoo.sh
+cd ..
+```
+
+The site answers at `https://odoo-steps.ddev.site` (`ddev delete -Oy odoo-steps` removes it when you are done).
+
+**2. A test project.**
+
+```bash
+mkdir odoo-tests && cd odoo-tests
+npm init -y
+npm install --save-dev webship-js @webship-js/odoo-steps
+npx init-webship-js
+```
+
+`npx init-webship-js` writes `cucumber.js`, `playwright.config.ts`, the `tests/` folders with a first feature and the `npm test` scripts, and installs Chromium. npm usually runs it already when it installs webship-js; a second run changes nothing.
+
+**3. `cucumber.js`.** Replace the file with the wiring of the pack: the step files of webship-js and of the pack, the address of the site, and the accounts (the JSON of [Test users](#test-users)).
+
+```javascript
+module.exports = {
+  default: {
+    requireModule: ['tsx/cjs'],
+    require: [
+      'node_modules/webship-js/tests/step-definitions/**/*.js',
+      'node_modules/@webship-js/odoo-steps/tests/step-definitions/**/*.js',
+      'tests/step-definitions/**/*.js',
+    ],
+    paths: ['tests/features/**/*.feature'],
+    format: ['@cucumber/pretty-formatter', 'json:tests/reports/cucumber_report.json'],
+    worldParameters: {
+      launchUrl: process.env.LAUNCH_URL || 'https://odoo-steps.ddev.site',
+      // The waits webship-js adds around each page, scenario and step (milliseconds).
+      minWaitTime: { page: 3000, before_scenario: 0, after_scenario: 0, before_step: 0, after_step: 0 },
+      users: {
+        admin: { username: 'admin', password: 'admin' },
+        salesperson: { username: 'salesperson', password: 'salesperson' },
+        accountant: { username: 'accountant', password: 'accountant' },
+        employee: { username: 'employee', password: 'employee' },
+        portal: { username: 'portal', password: 'portal' },
+      },
+      odoo: { database: '' },
+    },
+  },
+};
+```
+
+**4. A first feature**, `tests/features/first-run.feature`:
+
+```gherkin
+Feature: First run
+  Scenario: The administrator opens the sales pipeline
+    Given I am a logged in user with the "admin" user
+    When I open the "CRM" app
+    Then I should be in the "CRM" app
+    And I should see the "Qualified" column
+
+  Scenario: A visitor searches the shop
+    Given I am on "/shop"
+    When I search the shop for "desk"
+    Then I should see the "Customizable Desk" product in the shop
+```
+
+**5. Run it.**
+
+```bash
+npm test
+```
+
+A green first run prints every step, then the summary (the starter feature of `npx init-webship-js` and the two scenarios above, passed) and the HTML report it wrote:
+
+```
+3 scenarios (3 passed)
+9 steps (9 passed)
+0m32.947s (executing steps: 0m32.911s)
+[webship-js] HTML report → …/odoo-tests/tests/reports/cucumber_report.html
+```
+
+From there, copy the features of [`tests/features/`](tests/features/) (they also ship in the package, under `node_modules/@webship-js/odoo-steps/tests/features/`): together they use every step of the pack.
+
+### What the suite tests
+
+The features of this repository run every step of the pack against the demo-data site, in CI on every change: logging in as each kind of user of the registry and with a login and a password, a refused login, logging out from the web client and from the website, the user menu, who holds a session, the web client and the portal; access rights (what a salesperson, an accountant, an employee and a portal user may open, an access error and its dialog, a missing delete action); the apps menu, apps, menu paths, actions by their external ID, the breadcrumb and the view switcher; the search view (search, a named field, filters, grouping, facets); the list view (records, the pager, opening and walking records, selection); the kanban view (columns, cards, dragging a card to another stage); forms (a contact created, changed and deleted; a refused save; a product with a checkbox, a selection and a price; a quotation created with its lines, confirmed, cancelled and deleted; an opportunity moved through its stages), dialogs, notifications, smart buttons and the chatter; and the website: the layout, the blog, the shop (search, a product page, the cart badge, and the order the visitor's cart opens, deleted in the back office), events, jobs, the contact form (confirmed and refused), the 404 page, the website editor (opened, its building blocks, saved and discarded, and who may not open it), and an accessibility audit of the login screen and the front page.
+
+The suite leaves the site as it found it, apart from what Odoo records on its own: the tracking messages of an opportunity moved and moved back, the welcome messages of a user's first login, the registration mails of the event demo data, the website's visitor statistics, and the e-mail the contact form sends (it stays in the outgoing queue; the test site has no mail server).
+
+Not tested: Odoo 18 and later (the web client moved to `/odoo`), Odoo Enterprise, other languages, the apps the build does not install (Inventory, Purchase, Manufacturing, Point of Sale, Project, Helpdesk, ...), reports and printing, the database manager, settings, dragging a building block in the website editor, and e-mail (no step reads mail).
+
 ## Requirements
 
 - Node.js 20 or later
