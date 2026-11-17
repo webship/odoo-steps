@@ -13,6 +13,7 @@
     "test": "cucumber-js --config cucumber.js",
     "test:dry": "cucumber-js --config cucumber.js --dry-run",
     "test:examples": "node tests/check-examples.js",
+    "test:paths": "node tests/check-paths.js",
     "docs:steps": "node tests/list-steps.js",
     "docs:steps:check": "node tests/list-steps.js --check",
     "test:chromium": "BROWSER=chromium cucumber-js --config cucumber.js",
