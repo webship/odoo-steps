@@ -31,4 +31,5 @@ Feature: Odoo contact form
     Then I should see a contact form error
     And I should see a contact form error on "Email"
     And I should see a contact form error on "Question"
+    But I should not see a contact form error on "Subject"
     And I should not see the contact form confirmation

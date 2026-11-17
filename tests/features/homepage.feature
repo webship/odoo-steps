@@ -14,3 +14,11 @@ Feature: Odoo homepage
     Given I am on the homepage
     Then I should see the top menu
     And I should see the footer
+    But I should not be on the 404 page
+    And I should not see the contact us form
+
+  Scenario: The web client is not a page of the website
+    Given I am a logged in user with the "admin" user
+    Then I should not be on a website page
+    And I should not see the top menu
+    And I should not see the footer

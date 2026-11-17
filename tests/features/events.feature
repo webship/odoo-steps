@@ -6,4 +6,6 @@ Feature: Odoo events
   Scenario: Events index renders the events list
     Given I am on "/event"
     Then I should be on the events page
+    But I should not be on the jobs page
+    And I should not see job openings
     And the response status code should be 200
