@@ -43,6 +43,11 @@ Feature: Odoo sales quotation
     When I click the "Cancel" button in the dialog
     Then I should not see a dialog
     And the status should be "Cancelled"
+    When I choose "Delete" in the Actions menu
+    Then I should see the "Bye-bye, record!" dialog
+    When I confirm the dialog
+    Then I should not see a dialog
+    And the breadcrumb title should be "Quotations"
 
   Scenario: A dialog can be closed without confirming
     When I open the "Orders > Orders" menu
