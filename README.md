@@ -46,6 +46,17 @@ cd ..
 
 The site answers at `https://odoo-steps.ddev.site` (`ddev delete -Oy odoo-steps` removes it when you are done).
 
+In the [Webship Workspace](https://github.com/webship/workspace), its Odoo plugin builds the site instead, Odoo 17.0 Community with the same apps and Odoo's demo data, in a sites folder of the workspace (`test/` here; `dev/`, `sandboxes/` and `demos/` work the same):
+
+```bash
+bash core/scripts/plugins.sh --require odoo --with-needs
+bash core/scripts/plugins.sh --activate odoo --with-needs
+bash core/scripts/plugins.sh --install odoo
+bash test/cmd-odoo-project.sh mysite --install --add-users
+```
+
+That site answers at `https://mysite.ddev.site`. Its accounts are the plugin's (`administrator`, `salesperson`, `accountant`, `employee` and `portal`, each with the password `dD.123123ddd`; step 3 names them). The features of [`tests/features/`](tests/features/) pass there too, but for six lines that are about Odoo's own `admin` account: the demo pipeline belongs to it (the default "My Pipeline" filter shows its opportunities, such as "Quote for 600 Chairs"), and on a Workspace site that account is the workspace account.
+
 **2. A test project.**
 
 ```bash
@@ -87,6 +98,8 @@ module.exports = {
 };
 ```
 
+On a site from the Webship Workspace (step 1), the accounts are the plugin's: `admin: { username: 'administrator', password: 'dD.123123ddd' }`, and `salesperson`, `accountant`, `employee` and `portal` with the same password. Its address goes in `LAUNCH_URL` (step 5).
+
 **4. A first feature**, `tests/features/first-run.feature`:
 
 ```gherkin
@@ -109,6 +122,7 @@ Feature: First run
 npm test
 ```
 
+(`LAUNCH_URL=https://mysite.ddev.site npm test` for a site at another address.)
 A green first run prints every step, then the summary (the starter feature of `npx init-webship-js` and the two scenarios above, passed) and the HTML report it wrote:
 
 ```
