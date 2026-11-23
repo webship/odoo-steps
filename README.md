@@ -32,7 +32,7 @@ No step phrase names the platform: a step reads `When I open the "CRM" app`, `Wh
 
 ## From nothing to a green run
 
-What the machine needs: Docker, [DDEV](https://ddev.com), git, and Node.js 20 or later with npm. Odoo and PostgreSQL run in DDEV's containers (the `odoo:17.0` and `postgres:15-alpine` images, about 2.2 GB).
+What the machine needs: Docker, [DDEV](https://ddev.com), git, and Node.js 24 or later with npm. Odoo and PostgreSQL run in DDEV's containers (the `odoo:17.0` and `postgres:15-alpine` images, about 2.2 GB).
 
 **1. The Odoo site.** The repository's own DDEV project (the one CI runs) starts Odoo 17.0 Community and PostgreSQL, and its build script installs the apps with Odoo's demo data and creates the accounts of [Test users](#test-users); it takes a minute or two once the images are on the machine.
 
@@ -144,7 +144,7 @@ Not tested: Odoo 18 and later (the web client moved to `/odoo`), Odoo Enterprise
 
 ## Requirements
 
-- Node.js 20 or later
+- Node.js 24 or later
 - A [webship-js](https://www.npmjs.com/package/webship-js) 2.x project (`npx init-webship-js` creates one)
 - An Odoo site to test. The steps are proven on Odoo 17.0 Community.
 
